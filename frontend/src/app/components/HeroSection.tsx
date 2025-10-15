@@ -1,0 +1,35 @@
+import React from 'react';
+import Image from 'next/image';
+
+const HeroSection = () => (
+  <section className="w-full min-h-[90vh] flex flex-col items-center justify-center py-24 animate-fadeUp bg-gradient-to-br from-[#e6f6f2] to-[#f8feff]">
+    <div className="flex flex-col items-center gap-8 w-full max-w-6xl px-4">
+      <div className="bg-gradient-to-br from-cyan-400 to-teal-300 rounded-3xl p-6 shadow-2xl animate-float">
+        <Image
+          src="/logo.jpg"
+          alt="AI Facial Insight Generator Logo"
+          width={80}
+          height={80}
+          className="rounded-lg"
+        />
+      </div>
+      <h1 className="text-6xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-teal-300 drop-shadow-2xl tracking-tight font-sans" style={{letterSpacing:'-0.04em'}}>AI Facial Insight Generator</h1>
+      <p className="text-2xl md:text-3xl text-[#3ccfcf] max-w-3xl text-center font-medium" style={{fontFamily:'Poppins, Inter, sans-serif'}}>Advanced CNN-powered facial attribute analysis with privacy-first detailed reporting. Your data security is our top priority.</p>
+      <div className="flex gap-6 mt-8 w-full justify-center">
+        <a href="/analysis" className="btn-ghost bg-gradient-to-r from-cyan-400 to-teal-300 text-white font-bold text-xl px-8 py-4 rounded-xl shadow-xl hover:from-cyan-300 hover:to-teal-200 transition-all duration-200" style={{fontFamily:'Poppins, Inter, sans-serif', letterSpacing:'0.01em'}}>Start Analysis →</a>
+        <button
+          className="btn-ghost border-2 border-cyan-400 text-cyan-400 font-bold text-xl px-8 py-4 rounded-xl hover:bg-cyan-50 transition-all duration-200"
+          style={{fontFamily:'Poppins, Inter, sans-serif', letterSpacing:'0.01em'}}
+          onClick={() => {
+            const el = document.getElementById('privacy');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+        >
+          🔒 Privacy Policy
+        </button>
+      </div>
+    </div>
+  </section>
+);
+
+export default HeroSection;
