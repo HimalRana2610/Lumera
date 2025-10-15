@@ -1,0 +1,9 @@
+fastapi==0.119.0
+uvicorn==0.37.0
+python-multipart==0.0.20
+torch==2.8.0+cu129
+torchvision==0.23.0+cu129
+timm==1.0.20
+Pillow==11.3.0
+numpy==2.3.3
+reportlab==4.2.5
