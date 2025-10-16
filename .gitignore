@@ -6,3 +6,4 @@
 backend/model/convnext_tiny_celeb.pth
 backend/convnext_tiny_celeb.pth
 **/__pycache__
+**/.env

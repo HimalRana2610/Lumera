@@ -151,7 +151,7 @@ def predict_attributes(image_path: str, threshold: float = 0.5) -> str:
 # Example usage
 if __name__ == "__main__":
     # Replace with your image path
-    image_path = "./sample.jpg"
+    image_path = "./download.jpg"
     json_output = predict_attributes(image_path)
     print(json_output)
     # Optionally save to file
