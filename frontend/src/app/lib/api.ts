@@ -6,17 +6,23 @@ export const uploadImageForAnalysis = async (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await axios.post(`${API_BASE_URL}/predict`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
+  try {
+    const response = await axios.post(`${API_BASE_URL}/predict`, formData);
+    return response.data;
+  } catch (err: any) {
+    const message = err?.response?.data?.detail || err?.message || 'Upload failed';
+    throw new Error(message);
+  }
 };
 
-export const generateReport = async (data: any) => {
-  const response = await axios.post(`${API_BASE_URL}/generate_report`, data, {
-    responseType: 'blob', // Important for downloading files
-  });
-  return response.data;
+// Legacy PDF generation removed per new flow
+
+export const recordConsent = async (filename: string) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/consent`, { filename });
+    return response.data;
+  } catch (err: any) {
+    const message = err?.response?.data?.detail || err?.message || 'Consent failed';
+    throw new Error(message);
+  }
 };

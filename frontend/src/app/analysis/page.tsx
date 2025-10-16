@@ -1,6 +1,6 @@
 'use client';
 import NewUploadArea from '../components/NewUploadArea';
-import { uploadImageForAnalysis, generateReport } from '../lib/api';
+import { uploadImageForAnalysis, recordConsent } from '../lib/api';
 import React, { useState } from 'react';
 import Image from 'next/image';
 
@@ -14,11 +14,15 @@ export default function AnalysisPage() {
     skincare_recommendations?: string[];
     grooming_recommendations?: string[];
     grouped_attributes?: any;
+    cropped_image?: string;
   } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showDetailed, setShowDetailed] = useState(false);
   const [consentShown, setConsentShown] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [croppedFilename, setCroppedFilename] = useState<string | null>(null);
 
   const onImageUpload = (file: File) => {
     setUploadedFile(file);
@@ -33,23 +37,21 @@ export default function AnalysisPage() {
   const handleGenerateSummary = async () => {
     if (!uploadedFile) return;
     try {
+      setErrorMsg(null);
+      setIsGeneratingSummary(true);
       const data = await uploadImageForAnalysis(uploadedFile);
       setAnalysisData(data);
+      if ((data as any)?.cropped_image_filename) {
+        setCroppedFilename((data as any).cropped_image_filename);
+      }
       setShowSummary(true);
     } catch (error) {
       console.error('Error generating summary:', error);
-      // Fallback to mock if API fails
-      setAnalysisData({
-        summary: 'This person exhibits attributes commonly associated with youthfulness and a pleasant demeanor. Skin appears clear and well-maintained.',
-        attributes: {
-          'Youthful Appearance': 0.92,
-          'Clear Skin': 0.88,
-          'Smiling': 0.75,
-          'Oval Face': 0.80,
-          'Dark Hair': 0.95
-        }
-      });
-      setShowSummary(true);
+      const anyErr = error as any;
+      const msg = anyErr?.message || anyErr?.response?.data?.detail || 'Failed to analyze image. Ensure a clear face is visible and try again.';
+      setErrorMsg(msg);
+    } finally {
+      setIsGeneratingSummary(false);
     }
   };
 
@@ -58,32 +60,27 @@ export default function AnalysisPage() {
   };
 
   const handleAcceptConsent = async () => {
+    try {
+      if (croppedFilename) {
+        await recordConsent(croppedFilename);
+      }
+    } catch (e) {
+      console.error('Consent recording failed', e);
+      alert('Failed to record consent. Please try again.');
+      return;
+    }
+
     setConsentShown(false);
     setShowDetailed(true);
-    
-    // Generate and download PDF report
-    if (analysisData) {
-      setIsGeneratingReport(true);
-      try {
-        const pdfBlob = await generateReport(analysisData);
-        
-        // Create download link
-        const url = window.URL.createObjectURL(pdfBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `facial_analysis_report_${new Date().toISOString().split('T')[0]}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-        
-      } catch (error) {
-        console.error('Error generating PDF report:', error);
-        alert('Failed to generate PDF report. Please try again.');
-      } finally {
-        setIsGeneratingReport(false);
-      }
+
+    if (analysisData?.report_url) {
+      window.open(analysisData.report_url, '_blank');
     }
+  };
+
+  const handleRejectConsent = () => {
+    setConsentShown(false);
+    setShowDetailed(false);
   };
 
   const resetToUpload = () => {
@@ -102,12 +99,12 @@ export default function AnalysisPage() {
 
     return (
       <div className="glass-card p-6 rounded-xl mt-6 animate-fadeUp">
-        <h3 className="text-2xl font-bold text-center mb-4 text-[#0a101a]" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+        {/* <h3 className="text-2xl font-bold text-center mb-4 text-[#0a101a]" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
           Detailed Analysis & Recommendations
-        </h3>
+        </h3> */}
         
         {/* Skincare Recommendations */}
-        {analysisData.skincare_recommendations && analysisData.skincare_recommendations.length > 0 && (
+        {/* {analysisData.skincare_recommendations && analysisData.skincare_recommendations.length > 0 && (
           <div className="mb-6">
             <h4 className="text-lg font-bold mb-3 text-[#0a101a] flex items-center gap-2">
               <span>🧴</span>
@@ -122,10 +119,10 @@ export default function AnalysisPage() {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Grooming Recommendations */}
-        {analysisData.grooming_recommendations && analysisData.grooming_recommendations.length > 0 && (
+        {/* {analysisData.grooming_recommendations && analysisData.grooming_recommendations.length > 0 && (
           <div className="mb-6">
             <h4 className="text-lg font-bold mb-3 text-[#0a101a] flex items-center gap-2">
               <span>💇‍♂️</span>
@@ -140,7 +137,7 @@ export default function AnalysisPage() {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* PDF Download Success Message */}
         <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -148,10 +145,10 @@ export default function AnalysisPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="font-medium">PDF Report Downloaded Successfully!</span>
+            <span className="font-medium">Report Generated Successfully!</span>
           </div>
           <p className="text-green-600 text-sm mt-1">
-            Your detailed analysis report has been saved to your downloads folder.
+            Click Ctrl+P to open the print dialog and save as PDF to download the report
           </p>
         </div>
       </div>
@@ -196,7 +193,18 @@ export default function AnalysisPage() {
             {/* Image Preview */}
             <div className="relative mb-8 animate-fadeUp">
               <div className="border-4 border-cyan-300 rounded-2xl p-4 bg-white shadow-2xl max-w-md mx-auto">
-                {imagePreview && <img src={imagePreview} alt="Analysis Image" className="w-full h-64 object-cover rounded-xl" />}
+                {errorMsg ? (
+                  <div className="p-4 text-red-600 text-center font-semibold">{errorMsg}</div>
+                ) : (
+                  <>
+                    {/* Show cropped face if available, else original preview */}
+                    {analysisData?.cropped_image ? (
+                      <img src={analysisData.cropped_image} alt="Cropped Face" className="w-full h-64 object-cover rounded-xl" />
+                    ) : (
+                      imagePreview && <img src={imagePreview} alt="Analysis Image" className="w-full h-64 object-cover rounded-xl" />
+                    )}
+                  </>
+                )}
                 <button
                   onClick={resetToUpload}
                   className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg hover:bg-red-600 transition-colors"
@@ -211,13 +219,26 @@ export default function AnalysisPage() {
               {!showSummary && (
                 <button
                   onClick={handleGenerateSummary}
-                  className="bg-gradient-to-r from-cyan-400 to-teal-300 text-white font-bold px-8 py-4 rounded-xl shadow-xl hover:from-cyan-300 hover:to-teal-200 transition-all duration-200 flex items-center gap-2 justify-center"
+                  className="bg-gradient-to-r from-cyan-400 to-teal-300 text-white font-bold px-8 py-4 rounded-xl shadow-xl hover:from-cyan-300 hover:to-teal-200 transition-all duration-200 flex items-center gap-2 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={isGeneratingSummary}
                   style={{fontFamily: 'Poppins, Inter, sans-serif'}}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Generate Summary
+                  {isGeneratingSummary ? (
+                    <>
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Generate Summary
+                    </>
+                  )}
                 </button>
               )}
               {showSummary && !showDetailed && (
@@ -237,27 +258,29 @@ export default function AnalysisPage() {
             {/* Consent Circle */}
             {consentShown && (
               <div className="flex flex-col items-center mb-8 animate-fadeUp">
-                <p className="text-center text-[#0a101a] mb-6 max-w-md" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
-                  {isGeneratingReport 
-                    ? "Generating your detailed PDF report..." 
-                    : "Click to accept and view detailed analysis. Your privacy is protected."
-                  }
+                <p className="text-center text-[#0a101a] mb-6 max-w-xl" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+                  {isGeneratingReport
+                    ? "Generating your detailed PDF report..."
+                    : "To get detailed analysis report, please allow us to use your uploaded image to improve our AI model. Your image will be used securely and only for model training purposes. You can choose to accept or reject this request below."}
                 </p>
-                <button
-                  onClick={handleAcceptConsent}
-                  disabled={isGeneratingReport}
-                  className="w-24 h-24 rounded-full bg-gradient-to-r from-cyan-400 to-teal-300 text-white flex items-center justify-center text-3xl font-bold shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{fontFamily: 'Poppins, Inter, sans-serif'}}
-                >
-                  {isGeneratingReport ? (
-                    <svg className="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    '✓'
-                  )}
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleRejectConsent}
+                    disabled={isGeneratingReport}
+                    className="px-6 py-3 rounded-xl bg-gray-200 text-gray-800 font-bold shadow hover:bg-gray-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{fontFamily: 'Poppins, Inter, sans-serif'}}
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={handleAcceptConsent}
+                    disabled={isGeneratingReport}
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-300 text-white font-bold shadow hover:from-cyan-300 hover:to-teal-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{fontFamily: 'Poppins, Inter, sans-serif'}}
+                  >
+                    Accept
+                  </button>
+                </div>
               </div>
             )}
 
