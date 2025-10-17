@@ -40,16 +40,16 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" style={{backdropFilter:'blur(8px)'}}>
+      <div className="rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden" style={{background:'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.15) 100%)', border:'2px solid rgba(139,92,246,0.3)', backdropFilter:'blur(16px)'}}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-800" style={{fontFamily:'Poppins, Inter, sans-serif'}}>
+        <div className="flex items-center justify-between p-4 border-b border-[#8B5CF6]/30">
+          <h2 className="text-xl font-bold text-white" style={{fontFamily:'Poppins, Inter, sans-serif'}}>
             Camera Capture
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl font-bold transition-colors"
+            className="text-[#b3b8e0] hover:text-white text-2xl font-bold transition-colors"
           >
             ×
           </button>
@@ -73,8 +73,8 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
               <button
                 onClick={capture}
                 disabled={isCapturing}
-                className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-cyan-400 to-teal-300 text-white py-3 px-8 rounded-full font-bold shadow-lg hover:from-cyan-300 hover:to-teal-200 transition-all duration-200 disabled:opacity-50 flex items-center gap-2"
-                style={{fontFamily:'Poppins, Inter, sans-serif'}}
+                className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#3ee7f2] to-[#3fd3ff] text-white py-3 px-8 rounded-full font-bold shadow-lg hover:from-[#3fd3ff] hover:to-[#3ee7f2] transition-all duration-200 disabled:opacity-50 flex items-center gap-2"
+                style={{fontFamily:'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(62,231,242,0.5)'}}
               >
                 {isCapturing ? (
                   <>
@@ -107,12 +107,12 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
         </div>
 
         {/* Action Buttons */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className="p-4 border-t border-[#8B5CF6]/30" style={{background:'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(109,40,217,0.08) 100%)'}}>
           {!capturedImage ? (
             <div className="flex justify-center">
               <button
                 onClick={onClose}
-                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-xl transition-colors"
+                className="bg-[#2d3148] hover:bg-[#343a5b] text-white font-semibold py-3 px-8 rounded-xl transition-colors"
                 style={{fontFamily:'Poppins, Inter, sans-serif'}}
               >
                 Cancel
@@ -122,8 +122,8 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
             <div className="flex gap-3 justify-center">
               <button
                 onClick={retakePhoto}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
-                style={{fontFamily:'Poppins, Inter, sans-serif'}}
+                className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
+                style={{fontFamily:'Poppins, Inter, sans-serif', boxShadow:'0 4px 15px rgba(139,92,246,0.4)'}}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18l-6-6m0 0l6-6m-6 6h12" />
@@ -132,8 +132,8 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
               </button>
               <button
                 onClick={usePhoto}
-                className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-colors flex items-center gap-2 shadow-lg"
-                style={{fontFamily:'Poppins, Inter, sans-serif'}}
+                className="bg-gradient-to-r from-[#3ee7f2] to-[#3fd3ff] hover:from-[#3fd3ff] hover:to-[#3ee7f2] text-white font-semibold py-3 px-8 rounded-xl transition-colors flex items-center gap-2 shadow-lg"
+                style={{fontFamily:'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(62,231,242,0.5)'}}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -142,7 +142,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
               </button>
               <button
                 onClick={onClose}
-                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
+                className="bg-[#2d3148] hover:bg-[#343a5b] text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
                 style={{fontFamily:'Poppins, Inter, sans-serif'}}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -43,6 +43,7 @@ print("Model loaded successfully!")
 origins = [
     "http://localhost:3000",  # React app default port
     "http://localhost:8000",  # FastAPI default port
+    "http://127.0.0.1:3000",  # Allow loopback host as well
 ]
 
 app.add_middleware(

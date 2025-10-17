@@ -156,34 +156,44 @@ export default function AnalysisPage() {
   };
 
   return (
-    <main className="flex flex-col items-center w-full min-h-screen bg-gradient-to-br from-[#f8feff] to-[#e6f6f2] text-[#0a101a] font-sans overflow-x-hidden">
+    <main className="flex flex-col items-center w-full min-h-screen bg-gradient-to-br from-[#181c2f] via-[#23244a] to-[#101a2a] text-[#e6f6f2] font-sans overflow-x-hidden">
       {/* Navigation back to homepage */}
-      <div className="w-full max-w-6xl px-4 pt-8">
-        <a 
-          href="/" 
-          className="inline-flex items-center gap-2 text-cyan-500 hover:text-cyan-600 font-medium transition-colors"
-          style={{fontFamily:'Poppins, Inter, sans-serif'}}
-        >
-          <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-            <path d="M12.5 15l-5-5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Back to Homepage
-        </a>
+      <div className="w-full px-4 pt-6">
+        <div className="max-w-6xl mx-auto">
+          <a 
+            href="/" 
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all duration-200 hover:scale-105"
+            style={{
+              fontFamily:'Poppins, Inter, sans-serif',
+              background:'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.15) 100%)',
+              border:'2px solid rgba(139,92,246,0.3)',
+              color:'#a084ee',
+              boxShadow:'0 4px 15px rgba(139,92,246,0.2)'
+            }}
+          >
+            <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
+              <path d="M12.5 15l-5-5 5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back to Homepage
+          </a>
+        </div>
       </div>
       
-      <div className="w-full flex flex-col items-center justify-center py-16 max-w-4xl mx-auto px-4">
+      <div className="w-full flex flex-col items-center justify-center py-12 max-w-4xl mx-auto px-4">
         <div className="flex flex-col items-center mb-10">
-          <div className="bg-cyan-100 rounded-2xl p-4 mb-6 flex items-center justify-center">
+          <div className="rounded-2xl p-4 mb-6 flex items-center justify-center" style={{background:'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.15) 100%)', boxShadow:'0 0 24px rgba(139,92,246,0.35)'}}>
             <Image
               src="/logo.jpg"
-              alt="AI Facial Insight Generator Logo"
+              alt="LUMERA AI Logo"
               width={70}
               height={70}
               className="rounded-lg"
+              unoptimized
+              key={Date.now()}
             />
           </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold text-cyan-400 mb-2 text-center" style={{fontFamily:'Poppins, Inter, sans-serif'}}>AI Facial Insight Generator</h1>
-          <p className="text-xl md:text-2xl text-[#9fbfc3] text-center max-w-2xl">Advanced CNN-powered facial attribute analysis with privacy-first detailed reporting</p>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 text-center bg-clip-text text-transparent" style={{fontFamily:'Poppins, Inter, sans-serif', backgroundImage:'linear-gradient(90deg, #3ee7f2 0%, #3fd3ff 40%, #3ee7f2 100%)', textShadow:'0 2px 16px rgba(62,231,242,0.35)', letterSpacing:'-0.01em'}}>ILLUMINATE YOUR BEAUTY WITH AI</h1>
+          <p className="text-lg md:text-xl text-[#b3b8e0] text-center max-w-2xl">Advanced CNN-powered facial attribute analysis with privacy-first detailed reporting</p>
         </div>
 
         {showUpload ? (
@@ -192,7 +202,7 @@ export default function AnalysisPage() {
           <>
             {/* Image Preview */}
             <div className="relative mb-8 animate-fadeUp">
-              <div className="border-4 border-cyan-300 rounded-2xl p-4 bg-white shadow-2xl max-w-md mx-auto">
+              <div className="rounded-2xl p-4 bg-[#0f1222] shadow-2xl max-w-md mx-auto border border-[#8B5CF6]/40" style={{boxShadow:'0 10px 40px rgba(139,92,246,0.35)'}}>
                 {errorMsg ? (
                   <div className="p-4 text-red-600 text-center font-semibold">{errorMsg}</div>
                 ) : (
@@ -207,7 +217,7 @@ export default function AnalysisPage() {
                 )}
                 <button
                   onClick={resetToUpload}
-                  className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg hover:bg-red-600 transition-colors"
+                  className="absolute top-2 right-2 bg-[#EF4444] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg hover:bg-[#DC2626] transition-colors"
                 >
                   ×
                 </button>
@@ -219,9 +229,9 @@ export default function AnalysisPage() {
               {!showSummary && (
                 <button
                   onClick={handleGenerateSummary}
-                  className="bg-gradient-to-r from-cyan-400 to-teal-300 text-white font-bold px-8 py-4 rounded-xl shadow-xl hover:from-cyan-300 hover:to-teal-200 transition-all duration-200 flex items-center gap-2 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white font-bold px-8 py-4 rounded-xl shadow-xl hover:from-[#7C3AED] hover:to-[#8B5CF6] transition-all duration-200 flex items-center gap-2 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
                   disabled={isGeneratingSummary}
-                  style={{fontFamily: 'Poppins, Inter, sans-serif'}}
+                  style={{fontFamily: 'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(139,92,246,0.4)'}}
                 >
                   {isGeneratingSummary ? (
                     <>
@@ -244,8 +254,8 @@ export default function AnalysisPage() {
               {showSummary && !showDetailed && (
                 <button
                   onClick={handleGetDetailed}
-                  className="bg-gradient-to-r from-teal-300 to-cyan-400 text-white font-bold px-8 py-4 rounded-xl shadow-xl hover:from-teal-200 hover:to-cyan-300 transition-all duration-200 flex items-center gap-2 justify-center"
-                  style={{fontFamily: 'Poppins, Inter, sans-serif'}}
+                  className="bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white font-bold px-8 py-4 rounded-xl shadow-xl hover:from-[#8B5CF6] hover:to-[#7C3AED] transition-all duration-200 flex items-center gap-2 justify-center"
+                  style={{fontFamily: 'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(124,58,237,0.4)'}}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -258,7 +268,7 @@ export default function AnalysisPage() {
             {/* Consent Circle */}
             {consentShown && (
               <div className="flex flex-col items-center mb-8 animate-fadeUp">
-                <p className="text-center text-[#0a101a] mb-6 max-w-xl" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+                <p className="text-center text-[#e6f6f2] mb-6 max-w-xl" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
                   {isGeneratingReport
                     ? "Generating your detailed PDF report..."
                     : "To get detailed analysis report, please allow us to use your uploaded image to improve our AI model. Your image will be used securely and only for model training purposes. You can choose to accept or reject this request below."}
@@ -267,7 +277,7 @@ export default function AnalysisPage() {
                   <button
                     onClick={handleRejectConsent}
                     disabled={isGeneratingReport}
-                    className="px-6 py-3 rounded-xl bg-gray-200 text-gray-800 font-bold shadow hover:bg-gray-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 rounded-xl bg-[#2d3148] text-[#e6e8ff] font-bold shadow hover:bg-[#343a5b] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{fontFamily: 'Poppins, Inter, sans-serif'}}
                   >
                     Reject
@@ -275,8 +285,8 @@ export default function AnalysisPage() {
                   <button
                     onClick={handleAcceptConsent}
                     disabled={isGeneratingReport}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-300 text-white font-bold shadow hover:from-cyan-300 hover:to-teal-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{fontFamily: 'Poppins, Inter, sans-serif'}}
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white font-bold shadow hover:from-[#7C3AED] hover:to-[#8B5CF6] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{fontFamily: 'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(139,92,246,0.4)'}}
                   >
                     Accept
                   </button>
@@ -286,11 +296,11 @@ export default function AnalysisPage() {
 
             {/* Summary */}
             {showSummary && analysisData && (
-              <div className="glass-card p-6 rounded-xl mb-6 animate-fadeUp max-w-2xl">
-                <h2 className="text-2xl font-bold text-center mb-4 text-[#0a101a]" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+              <div className="p-6 rounded-xl mb-6 animate-fadeUp max-w-2xl" style={{background:'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(109,40,217,0.12) 100%)', border:'2px solid rgba(139,92,246,0.25)', boxShadow:'0 4px 20px rgba(139,92,246,0.15)'}}>
+                <h2 className="text-2xl font-bold text-center mb-4 text-white" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
                   AI-Generated Summary
                 </h2>
-                <p className="text-[var(--muted)] leading-relaxed text-base font-medium text-center" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+                <p className="text-[#b3b8e0] leading-relaxed text-base font-medium text-center" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
                   {analysisData.summary}
                 </p>
               </div>
@@ -302,8 +312,8 @@ export default function AnalysisPage() {
             {/* New Upload Button */}
             <button
               onClick={resetToUpload}
-              className="mt-8 bg-gradient-to-r from-cyan-400 to-teal-300 text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:from-cyan-300 hover:to-teal-200 transition-all duration-200"
-              style={{fontFamily:'Poppins, Inter, sans-serif'}}
+              className="mt-8 bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:from-[#7C3AED] hover:to-[#8B5CF6] transition-all duration-200"
+              style={{fontFamily:'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(139,92,246,0.4)'}}
             >
               Analyze Another Image
             </button>
