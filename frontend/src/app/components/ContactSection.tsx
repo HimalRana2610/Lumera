@@ -2,8 +2,8 @@ import React from 'react';
 
 const ContactSection = () => (
   <section className="w-full py-16 flex flex-col items-center animate-fadeUp bg-gradient-to-br from-[#181c2f] via-[#23244a] to-[#101a2a]" id="contact">
-    <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center text-[#b3e0ff]" style={{fontFamily: 'Poppins, Inter, sans-serif', textShadow:'0 2px 16px #6f6ee888'}}>Get In Touch</h2>
-    <p className="mb-8 text-[#b3b8e0] text-center">Have questions? We are here to help</p>
+    <h2 className="heading-2 mb-4 text-center text-[#b3e0ff]" style={{textShadow:'0 2px 16px #6f6ee888'}}>Get In Touch</h2>
+    <p className="body-text mb-8 text-[#b3b8e0] text-center">Have questions? We are here to help</p>
     {/* Contact Info Card */}
     <div className="rounded-2xl p-10 shadow-[0_0_32px_0_#23244a88] flex flex-col gap-8 items-center max-w-2xl w-full border border-[#6f6ee8] bg-gradient-to-br from-[#23244a] to-[#181c2f]" style={{fontFamily:'Poppins, Inter, sans-serif'}}>
       <div className="w-full flex flex-row justify-between items-center gap-8 mb-4">
@@ -21,8 +21,8 @@ const ContactSection = () => (
               </defs>
             </svg>
           </div>
-          <span className="font-bold text-lg text-white mb-1">Email</span>
-          <span className="text-[#b3b8e0] text-sm">support@lumeraai.com</span>
+          <span className="heading-3 text-white mb-1">Email</span>
+          <span className="caption text-[#b3b8e0]">support@lumeraai.com</span>
         </div>
         {/* Phone */}
         <div className="flex flex-col items-center flex-1">
@@ -31,8 +31,8 @@ const ContactSection = () => (
               <path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57a1 1 0 0 0-1.02.24l-2.2 2.2a15.045 15.045 0 0 1-6.59-6.59l2.2-2.21a.96.96 0 0 0 .25-1A11.36 11.36 0 0 1 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1zM19 12h2a9 9 0 0 0-9-9v2c3.87 0 7 3.13 7 7zm-4 0h2c0-2.76-2.24-5-5-5v2c1.66 0 3 1.34 3 3z" fill="#fff"/>
             </svg>
           </div>
-          <span className="font-bold text-lg text-white mb-1">Phone</span>
-          <span className="text-[#b3b8e0] text-sm">+1 (555) 123-4567</span>
+          <span className="heading-3 text-white mb-1">Phone</span>
+          <span className="caption text-[#b3b8e0]">+1 (555) 123-4567</span>
         </div>
         {/* Location */}
         <div className="flex flex-col items-center flex-1">
@@ -41,8 +41,8 @@ const ContactSection = () => (
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z" fill="#fff"/>
             </svg>
           </div>
-          <span className="font-bold text-lg text-white mb-1">Location</span>
-          <span className="text-[#b3b8e0] text-sm">San Francisco, CA</span>
+          <span className="heading-3 text-white mb-1">Location</span>
+          <span className="caption text-[#b3b8e0]">San Francisco, CA</span>
         </div>
       </div>
       <hr className="w-full border-t border-[#23244a] mb-4 opacity-40" />

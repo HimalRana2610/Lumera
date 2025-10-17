@@ -104,12 +104,12 @@ const NewUploadArea: React.FC<NewUploadAreaProps> = ({ onImageUpload }) => {
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-2" style={{fontFamily:'Poppins, Inter, sans-serif'}}>
+          <h2 className="heading-3 text-white mb-1">
             Upload or Capture Image
           </h2>
 
           {/* Description */}
-          <p className="text-lg text-[#b3b8e0] mb-8">
+          <p className="body-text text-[#b3b8e0] mb-6">
             Drag and drop an image, or use the buttons below
           </p>
 
@@ -118,7 +118,7 @@ const NewUploadArea: React.FC<NewUploadAreaProps> = ({ onImageUpload }) => {
             {/* Upload Image Button */}
             <button
               onClick={handleUploadClick}
-              className="bg-gradient-to-r from-[#3ee7f2] to-[#3fd3ff] hover:from-[#3fd3ff] hover:to-[#3ee7f2] text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+              className="bg-gradient-to-r from-[#3ee7f2] to-[#3fd3ff] hover:from-[#3fd3ff] hover:to-[#3ee7f2] text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
               style={{fontFamily:'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(62,231,242,0.4)'}}
             >
               <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
@@ -131,7 +131,7 @@ const NewUploadArea: React.FC<NewUploadAreaProps> = ({ onImageUpload }) => {
             {/* Use Camera Button */}
             <button
               onClick={handleCameraClick}
-              className="border-2 border-[#3ee7f2] text-[#3ee7f2] hover:bg-[#3ee7f2]/10 font-bold py-4 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+              className="border-2 border-[#3ee7f2] text-[#3ee7f2] hover:bg-[#3ee7f2]/10 font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
               style={{fontFamily:'Poppins, Inter, sans-serif'}}
             >
               <svg width="20" height="20" fill="none" viewBox="0 0 20 20">

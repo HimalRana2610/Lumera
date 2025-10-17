@@ -3,6 +3,7 @@ import NewUploadArea from '../components/NewUploadArea';
 import { uploadImageForAnalysis, recordConsent } from '../lib/api';
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AnalysisPage() {
   const [showUpload, setShowUpload] = useState(true);
@@ -13,8 +14,9 @@ export default function AnalysisPage() {
     attributes: Record<string, number | string>;
     skincare_recommendations?: string[];
     grooming_recommendations?: string[];
-    grouped_attributes?: any;
+    grouped_attributes?: Record<string, unknown>;
     cropped_image?: string;
+    report_url?: string;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -39,16 +41,30 @@ export default function AnalysisPage() {
     try {
       setErrorMsg(null);
       setIsGeneratingSummary(true);
-      const data = await uploadImageForAnalysis(uploadedFile);
+      const data: {
+        summary: string;
+        attributes: Record<string, number | string>;
+        skincare_recommendations?: string[];
+        grooming_recommendations?: string[];
+        grouped_attributes?: Record<string, unknown>;
+        cropped_image?: string;
+        cropped_image_filename?: string;
+        report_url?: string;
+      } = await uploadImageForAnalysis(uploadedFile);
       setAnalysisData(data);
-      if ((data as any)?.cropped_image_filename) {
-        setCroppedFilename((data as any).cropped_image_filename);
+      if (data?.cropped_image_filename) {
+        setCroppedFilename(data.cropped_image_filename);
       }
       setShowSummary(true);
     } catch (error) {
       console.error('Error generating summary:', error);
-      const anyErr = error as any;
-      const msg = anyErr?.message || anyErr?.response?.data?.detail || 'Failed to analyze image. Ensure a clear face is visible and try again.';
+      let msg = 'Failed to analyze image. Ensure a clear face is visible and try again.';
+      if (error instanceof Error) {
+        msg = error.message;
+      } else if (typeof error === 'object' && error !== null && 'response' in error) {
+        const maybeResp = error as { response?: { data?: { detail?: string } } };
+        msg = maybeResp.response?.data?.detail || msg;
+      }
       setErrorMsg(msg);
     } finally {
       setIsGeneratingSummary(false);
@@ -160,7 +176,7 @@ export default function AnalysisPage() {
       {/* Navigation back to homepage */}
       <div className="w-full px-4 pt-6">
         <div className="max-w-6xl mx-auto">
-          <a 
+          <Link 
             href="/" 
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all duration-200 hover:scale-105"
             style={{
@@ -175,7 +191,7 @@ export default function AnalysisPage() {
               <path d="M12.5 15l-5-5 5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             Back to Homepage
-          </a>
+          </Link>
         </div>
       </div>
       
@@ -183,17 +199,18 @@ export default function AnalysisPage() {
         <div className="flex flex-col items-center mb-10">
           <div className="rounded-2xl p-4 mb-6 flex items-center justify-center" style={{background:'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.15) 100%)', boxShadow:'0 0 24px rgba(139,92,246,0.35)'}}>
             <Image
-              src="/logo.jpg"
+              src="/logo_new.jpg"
               alt="LUMERA AI Logo"
               width={70}
               height={70}
-              className="rounded-lg"
+              className="rounded-xl shadow-lg border border-[#8B5CF6] bg-white p-2"
+              style={{ boxShadow: '0 0 15px rgba(139,92,246,0.5)', background: '#fff', padding: '8px', borderWidth: '2px' }}
               unoptimized
               key={Date.now()}
             />
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 text-center bg-clip-text text-transparent" style={{fontFamily:'Poppins, Inter, sans-serif', backgroundImage:'linear-gradient(90deg, #3ee7f2 0%, #3fd3ff 40%, #3ee7f2 100%)', textShadow:'0 2px 16px rgba(62,231,242,0.35)', letterSpacing:'-0.01em'}}>ILLUMINATE YOUR BEAUTY WITH AI</h1>
-          <p className="text-lg md:text-xl text-[#b3b8e0] text-center max-w-2xl">Advanced CNN-powered facial attribute analysis with privacy-first detailed reporting</p>
+          <h1 className="heading-2 mb-2 text-center bg-clip-text text-transparent" style={{fontFamily:'Poppins, Inter, sans-serif', backgroundImage:'linear-gradient(90deg, #3ee7f2 0%, #3fd3ff 40%, #3ee7f2 100%)', textShadow:'0 2px 16px rgba(62,231,242,0.35)'}}>ILLUMINATE YOUR BEAUTY WITH AI</h1>
+          <p className="lead text-[#b3b8e0] text-center max-w-2xl">Advanced CNN-powered facial attribute analysis with privacy-first detailed reporting</p>
         </div>
 
         {showUpload ? (
@@ -209,9 +226,9 @@ export default function AnalysisPage() {
                   <>
                     {/* Show cropped face if available, else original preview */}
                     {analysisData?.cropped_image ? (
-                      <img src={analysisData.cropped_image} alt="Cropped Face" className="w-full h-64 object-cover rounded-xl" />
+                      <Image src={analysisData.cropped_image} alt="Cropped Face" width={400} height={256} className="w-full h-64 object-cover rounded-xl" />
                     ) : (
-                      imagePreview && <img src={imagePreview} alt="Analysis Image" className="w-full h-64 object-cover rounded-xl" />
+                      imagePreview && <Image src={imagePreview} alt="Analysis Image" width={400} height={256} className="w-full h-64 object-cover rounded-xl" />
                     )}
                   </>
                 )}
@@ -229,7 +246,7 @@ export default function AnalysisPage() {
               {!showSummary && (
                 <button
                   onClick={handleGenerateSummary}
-                  className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white font-bold px-8 py-4 rounded-xl shadow-xl hover:from-[#7C3AED] hover:to-[#8B5CF6] transition-all duration-200 flex items-center gap-2 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white font-semibold px-6 py-3 rounded-xl shadow-xl hover:from-[#7C3AED] hover:to-[#8B5CF6] transition-all duration-200 flex items-center gap-2 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
                   disabled={isGeneratingSummary}
                   style={{fontFamily: 'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(139,92,246,0.4)'}}
                 >
@@ -254,7 +271,7 @@ export default function AnalysisPage() {
               {showSummary && !showDetailed && (
                 <button
                   onClick={handleGetDetailed}
-                  className="bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white font-bold px-8 py-4 rounded-xl shadow-xl hover:from-[#8B5CF6] hover:to-[#7C3AED] transition-all duration-200 flex items-center gap-2 justify-center"
+                  className="bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white font-semibold px-6 py-3 rounded-xl shadow-xl hover:from-[#8B5CF6] hover:to-[#7C3AED] transition-all duration-200 flex items-center gap-2 justify-center"
                   style={{fontFamily: 'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(124,58,237,0.4)'}}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,10 +314,10 @@ export default function AnalysisPage() {
             {/* Summary */}
             {showSummary && analysisData && (
               <div className="p-6 rounded-xl mb-6 animate-fadeUp max-w-2xl" style={{background:'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(109,40,217,0.12) 100%)', border:'2px solid rgba(139,92,246,0.25)', boxShadow:'0 4px 20px rgba(139,92,246,0.15)'}}>
-                <h2 className="text-2xl font-bold text-center mb-4 text-white" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+                <h2 className="heading-3 text-center mb-3 text-white">
                   AI-Generated Summary
                 </h2>
-                <p className="text-[#b3b8e0] leading-relaxed text-base font-medium text-center" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+                <p className="body-text text-[#b3b8e0] leading-relaxed font-medium text-center">
                   {analysisData.summary}
                 </p>
               </div>
@@ -312,7 +329,7 @@ export default function AnalysisPage() {
             {/* New Upload Button */}
             <button
               onClick={resetToUpload}
-              className="mt-8 bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:from-[#7C3AED] hover:to-[#8B5CF6] transition-all duration-200"
+              className="mt-8 bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:from-[#7C3AED] hover:to-[#8B5CF6] transition-all duration-200"
               style={{fontFamily:'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(139,92,246,0.4)'}}
             >
               Analyze Another Image

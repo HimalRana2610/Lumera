@@ -39,7 +39,7 @@ const steps = [
 
 const HowItWorks = () => (
   <section className="w-full py-24 flex flex-col items-center animate-fadeUp bg-gradient-to-br from-[#181c2f] via-[#23244a] to-[#101a2a]" id="how-it-works">
-    <h2 className="text-5xl md:text-6xl font-extrabold mb-20 text-center text-white font-sans animate-fadeUp tracking-tight" style={{letterSpacing:'-0.02em', textShadow:'0 2px 16px #a084ee88'}}>How It Works</h2>
+  <h2 className="heading-2 mb-14 text-center text-white animate-fadeUp" style={{textShadow:'0 2px 16px #a084ee88'}}>How It Works</h2>
     <div className="relative w-full max-w-3xl flex flex-col items-center mx-auto">
       {steps.map((step, idx) => (
         <div key={step.number} className="relative z-10 flex flex-row items-center w-full group mb-12 last:mb-0">
@@ -72,8 +72,8 @@ const HowItWorks = () => (
           </div>
           <div className="flex-1 flex flex-col justify-center">
             <div className="bg-[#23244a]/80 border border-[#a084ee] rounded-2xl px-8 py-6 shadow-lg mb-2">
-              <div className="text-2xl md:text-3xl font-extrabold text-white mb-2 animate-fadeUp tracking-tight font-sans" style={{fontFamily:'Poppins, Inter, sans-serif'}}>{step.title}</div>
-              <div className="text-lg md:text-xl text-[#b3b8e0] font-medium animate-fadeUp font-sans" style={{fontFamily:'Poppins, Inter, sans-serif'}}>{step.desc}</div>
+              <div className="heading-3 text-white mb-1 animate-fadeUp">{step.title}</div>
+              <div className="body-text text-[#b3b8e0] font-medium animate-fadeUp">{step.desc}</div>
             </div>
           </div>
         </div>

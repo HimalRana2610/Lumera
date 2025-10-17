@@ -27,10 +27,10 @@ const PrivacySection = () => (
           
           {/* Text */}
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-3" style={{fontFamily: 'Poppins, Inter, sans-serif', textShadow: '0 2px 16px rgba(139,92,246,0.5)'}}>
+            <h2 className="heading-2 text-white mb-2" style={{textShadow: '0 2px 16px rgba(139,92,246,0.5)'}}>
               Privacy is Our Priority
             </h2>
-            <p className="text-lg md:text-xl text-[#b3b8e0]" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+            <p className="lead text-[#b3b8e0]">
               Your privacy is secured with enterprise-grade encryption and never stored without consent
             </p>
           </div>
@@ -61,10 +61,10 @@ const PrivacySection = () => (
               <path d="M12 12V9C12 6.8 13.8 5 16 5C18.2 5 20 6.8 20 9V12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
             </svg>
           </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white mb-2" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+          <h3 className="heading-3 text-white mb-1">
             End-to-End Encryption
           </h3>
-          <p className="text-base text-[#b3b8e0]" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+          <p className="body-text text-[#b3b8e0]">
             Military-grade AES-256 encryption
           </p>
         </div>
@@ -90,10 +90,10 @@ const PrivacySection = () => (
               <path d="M10 10L22 22M22 10L10 22" stroke="white" strokeWidth="3" strokeLinecap="round"/>
             </svg>
           </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white mb-2" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+          <h3 className="heading-3 text-white mb-1">
             No Data Storage
           </h3>
-          <p className="text-base text-[#b3b8e0]" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+          <p className="body-text text-[#b3b8e0]">
             Images deleted after analysis
           </p>
         </div>
@@ -119,10 +119,10 @@ const PrivacySection = () => (
               <path d="M11 16L15 20L21 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white mb-2" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+          <h3 className="heading-3 text-white mb-1">
             Explicit Consent
           </h3>
-          <p className="text-base text-[#b3b8e0]" style={{fontFamily: 'Poppins, Inter, sans-serif'}}>
+          <p className="body-text text-[#b3b8e0]">
             Full control over your data
           </p>
         </div>

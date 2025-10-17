@@ -1,7 +1,8 @@
-
 import './globals.css';
 import type { Metadata } from 'next';
-import './fonts';
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -26,20 +27,20 @@ export default function RootLayout({
             <div className="max-w-6xl mx-auto flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Image
-                  src="/logo.jpg"
+                  src="/logo_new.jpg"
                   alt="LUMERA AI Logo"
-                  width={50}
-                  height={50}
-                  className="rounded-xl shadow-lg border-2 border-[#8B5CF6] animate-float"
-                  style={{boxShadow: '0 0 15px rgba(139,92,246,0.5)'}}
+                  width={60}
+                  height={60}
+                  className="rounded-xl shadow-lg border-2 border-[#8B5CF6] animate-float bg-white p-2"
+                  style={{ boxShadow: '0 0 15px rgba(139,92,246,0.5)', background: '#fff', padding: '8px' }}
                   unoptimized
                   key={Date.now()}
                 />
                 <span
-                  className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent"
+                  className="heading-3 font-extrabold bg-clip-text text-transparent"
                   style={{
                     fontFamily: 'Poppins, Inter, sans-serif',
-                    letterSpacing: '0.02em',
+                    letterSpacing: '0.01em',
                     backgroundImage: 'linear-gradient(90deg, #a084ee 0%, #ff77c8 40%, #f4c6a5 60%, #a084ee 100%)',
                     textShadow: '0 2px 20px rgba(139,92,246,0.6)'
                   }}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface SummaryCardProps {
   imageUrl: string;
@@ -64,7 +65,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
 
         <div className="relative z-10 p-6 md:p-10 pt-16">
           {/* Title */}
-          <h2 className="text-3xl md:text-4xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-2)] mb-2 animate-fadeUp">
+          <h2 className="heading-3 text-center bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-2)] mb-2 animate-fadeUp">
             AI Analysis Results
           </h2>
           {/* Animated Divider */}
@@ -73,9 +74,11 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
           <div className="grid md:grid-cols-2 gap-8">
             {/* Image with animated border */}
             <div className="relative group rounded-xl overflow-hidden shadow-lg animate-fadeUp">
-              <img
+              <Image
                 src={imageUrl}
                 alt="analyzed"
+                width={800}
+                height={600}
                 className="w-full h-56 object-cover rounded-xl border-2 border-[var(--accent-primary)] group-hover:scale-105 transition-transform duration-700"
               />
               {/* AI grid overlay on hover */}
@@ -102,9 +105,9 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
                     <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
-                  <span className="text-lg font-semibold text-aqua-400">Summary</span>
+                  <span className="lead font-semibold text-aqua-400">Summary</span>
                 </div>
-                <p className="text-[var(--muted)] leading-relaxed text-base font-medium animate-fadeUp">
+                <p className="body-text text-[var(--muted)] leading-relaxed font-medium animate-fadeUp">
                   {summary}
                 </p>
               </div>
