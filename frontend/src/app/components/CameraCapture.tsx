@@ -1,6 +1,7 @@
 'use client';
 import React, { useRef, useState, useCallback } from 'react';
 import Webcam from 'react-webcam';
+import Image from 'next/image';
 
 interface CameraCaptureProps {
   onCapture: (imageSrc: string) => void;
@@ -32,8 +33,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
       // Convert data URL to File object
       fetch(capturedImage)
         .then(res => res.blob())
-        .then(blob => {
-          const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+        .then(() => {
           onCapture(capturedImage);
         });
     }
@@ -44,12 +44,12 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
       <div className="rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden" style={{background:'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.15) 100%)', border:'2px solid rgba(139,92,246,0.3)', backdropFilter:'blur(16px)'}}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[#8B5CF6]/30">
-          <h2 className="text-xl font-bold text-white" style={{fontFamily:'Poppins, Inter, sans-serif'}}>
+          <h2 className="heading-3 text-white">
             Camera Capture
           </h2>
           <button
             onClick={onClose}
-            className="text-[#b3b8e0] hover:text-white text-2xl font-bold transition-colors"
+            className="text-[#b3b8e0] hover:text-white text-xl font-bold transition-colors"
           >
             ×
           </button>
@@ -97,9 +97,11 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
             </div>
           ) : (
             <div className="relative bg-gray-100 rounded-xl overflow-hidden">
-              <img
+              <Image
                 src={capturedImage}
                 alt="Captured"
+                width={1280}
+                height={720}
                 className="w-full h-80 object-cover"
               />
             </div>
