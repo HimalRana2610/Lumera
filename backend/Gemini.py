@@ -1,27 +1,52 @@
 import json
 import os
 from typing import Dict, Any, List, Optional
-import google.generativeai as genai
+try:
+    import google.generativeai as genai  # type: ignore
+except Exception:
+    genai = None
 from datetime import datetime
 from dotenv import load_dotenv
 
 # ============================================================
 # GEMINI CONFIGURATION
 # ============================================================
-load_dotenv()
+# Load .env from current working directory and also from this file's directory
+# so that starting uvicorn from parent/root still picks up the key.
+load_dotenv()  # try CWD first
+try:
+    _HERE = os.path.dirname(os.path.abspath(__file__))
+    _ENV_PATH = os.path.join(_HERE, ".env")
+    if os.path.exists(_ENV_PATH):
+        load_dotenv(dotenv_path=_ENV_PATH, override=False)
+except Exception:
+    # Non-fatal: we will still rely on existing env if present
+    pass
 GEMINI_MODEL = "gemini-2.0-flash-exp"
+GEMINI_ENABLED = False
 
 def configure_gemini() -> bool:
-    """Configures the Gemini API client with error handling."""
+    """Configures the Gemini API client. Falls back gracefully if unavailable."""
+    global GEMINI_ENABLED
+    # If package import failed, we cannot use Gemini
+    if genai is None:
+        GEMINI_ENABLED = False
+        print("⚠️ google.generativeai not available; using local fallback generation")
+        return False
     try:
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables")
+            GEMINI_ENABLED = False
+            print("⚠️ GEMINI_API_KEY not set; using local fallback generation")
+            return False
         genai.configure(api_key=api_key)
+        GEMINI_ENABLED = True
         print("✅ Gemini API configured successfully")
         return True
     except Exception as e:
-        raise ValueError(f"Failed to configure Gemini API: {str(e)}")
+        GEMINI_ENABLED = False
+        print(f"⚠️ Failed to configure Gemini API: {str(e)} — using local fallback generation")
+        return False
 
 # ============================================================
 # ENHANCED HTML TEMPLATE
@@ -458,74 +483,122 @@ def clean_json_response(response_text: str) -> str:
     
     return response_text.strip()
 
-def generate_summary(data: Dict[str, Any]) -> str:
-    """Generates a short summary using Gemini with enhanced error handling."""
+def _local_summary(data: Dict[str, Any]) -> str:
+    # Construct a lightweight, human-friendly summary from available fields
     try:
-        data_str = json.dumps(data, indent=2)
-        prompt = GEMINI_SUMMARY_PROMPT.format(data_str=data_str)
-        
-        model = genai.GenerativeModel(GEMINI_MODEL)
-        response = model.generate_content(prompt)
-        summary = response.text.strip()
-        
-        print(f"✅ Generated summary ({len(summary)} characters)")
-        return summary
-    except Exception as e:
-        print(f"⚠️ Warning: Failed to generate summary: {str(e)}")
-        return "A comprehensive facial analysis has been conducted based on the provided image data."
+        attrs = []
+        getp = lambda k: data.get(k, {}).get("predicted") if isinstance(data.get(k), dict) else data.get(k)
+        if getp("male") is True:
+            attrs.append("male")
+        elif getp("male") is False:
+            attrs.append("female")
+        if getp("attractive") is True:
+            attrs.append("attractive features")
+        if getp("sharp_jawline") is True:
+            attrs.append("a defined jawline")
+        if getp("high_cheekbones") is True:
+            attrs.append("high cheekbones")
+        if getp("big_eyes") is True:
+            attrs.append("expressive eyes")
+        if getp("sharp_nose") is True:
+            attrs.append("a sharp nose")
+        if getp("well_groomed") is True:
+            attrs.append("well-groomed appearance")
+        bits = ", ".join(attrs[:-1]) + (" and " + attrs[-1] if attrs else "")
+        core = f"You appear {bits}." if bits else "Your image has been analyzed for key facial attributes."
+        extras = []
+        if getp("oily_skin") is True:
+            extras.append("Consider oil-control skincare for balance.")
+        if getp("curly_hair") is True:
+            extras.append("Curl-enhancing care can improve definition.")
+        tail = " ".join(extras)
+        return (core + " " + tail).strip()
+    except Exception:
+        return "Your facial attributes have been analyzed and summarized."
+
+def generate_summary(data: Dict[str, Any]) -> str:
+    """Generates a short summary; uses Gemini if available, else local fallback."""
+    if GEMINI_ENABLED and genai is not None:
+        try:
+            data_str = json.dumps(data, indent=2)
+            prompt = GEMINI_SUMMARY_PROMPT.format(data_str=data_str)
+            model = genai.GenerativeModel(GEMINI_MODEL)
+            response = model.generate_content(prompt)
+            summary = response.text.strip()
+            print(f"✅ Generated summary ({len(summary)} characters)")
+            return summary
+        except Exception as e:
+            print(f"⚠️ Warning: Gemini summary failed: {str(e)}; using local fallback")
+    return _local_summary(data)
+
+def _local_content(data: Dict[str, Any]) -> Dict[str, Any]:
+    def pred(k):
+        v = data.get(k)
+        if isinstance(v, dict):
+            return bool(v.get("predicted"))
+        return bool(v)
+    skincare = []
+    grooming = []
+    positives = []
+    improve = []
+    other = []
+    if pred("oily_skin"):
+        skincare.append("Use an oil-free cleanser and non-comedogenic moisturizer.")
+    if pred("dark_circles"):
+        skincare.append("Consider eye cream with caffeine and ensure proper sleep.")
+    if pred("curly_hair"):
+        grooming.append("Use sulfate-free shampoo and a curl-defining leave-in.")
+    if pred("has_beard"):
+        grooming.append("Apply beard oil and maintain regular trims for shape.")
+    if pred("sharp_jawline"):
+        positives.append("Well-defined jawline enhances facial structure.")
+    if pred("big_eyes"):
+        positives.append("Expressive eyes draw positive attention.")
+    if pred("attractive"):
+        positives.append("Overall attractive facial balance.")
+    if pred("patchy_beard"):
+        improve.append("Even growth can improve with regular grooming and patience.")
+    if pred("receeding_hairline"):
+        improve.append("Consult a specialist and consider volumizing hairstyles.")
+    other.append("Recommendations are informational and not medical advice.")
+    return {
+        "skincare_list": skincare[:4] or ["Maintain a consistent, gentle skincare routine."],
+        "grooming_list": grooming[:4] or ["Keep a regular grooming routine aligned with your hair type."],
+        "attractiveness_comment": "",
+        "positive_features_list": positives[:5] or ["Multiple strengths observed across features."],
+        "features_to_improve_list": improve[:4] or ["No major areas of improvement identified."],
+        "other_observations_list": other[:3]
+    }
 
 def generate_content(data: Dict[str, Any], feature_descriptions: Dict[str, Any]) -> Dict[str, Any]:
-    """Generates text content for HTML sections using Gemini with robust error handling."""
-    try:
-        prompt = GEMINI_CONTENT_PROMPT.format(
-            json_data=json.dumps(data, indent=2),
-            feature_descriptions=json.dumps(feature_descriptions, indent=2)
-        )
-        
-        model = genai.GenerativeModel(GEMINI_MODEL)
-        response = model.generate_content(prompt)
-        raw_response = response.text.strip()
-        
-        print("📝 Raw Gemini response received")
-        
-        # Clean the response
-        cleaned_response = clean_json_response(raw_response)
-        
-        # Parse JSON
-        content = json.loads(cleaned_response)
-        
-        # Validate structure
-        required_keys = [
-            "skincare_list", "grooming_list", "attractiveness_comment",
-            "positive_features_list", "features_to_improve_list", "other_observations_list"
-        ]
-        
-        for key in required_keys:
-            if key not in content:
-                print(f"⚠️ Warning: Missing key '{key}', adding empty default")
-                if key.endswith("_list"):
-                    content[key] = []
-                else:
-                    content[key] = ""
-        
-        print("✅ Content validation successful")
-        return content
-        
-    except json.JSONDecodeError as e:
-        print(f"❌ JSON parsing error: {str(e)}")
-        print(f"Raw response: {raw_response[:500]}...")
-        # Return default structure
-        return {
-            "skincare_list": ["Analysis data available - please check source"],
-            "grooming_list": ["Analysis data available - please check source"],
-            "attractiveness_comment": "",
-            "positive_features_list": ["Multiple features analyzed"],
-            "features_to_improve_list": ["Review detailed analysis"],
-            "other_observations_list": ["Comprehensive data collected"]
-        }
-    except Exception as e:
-        print(f"❌ Error generating content: {str(e)}")
-        raise RuntimeError(f"Failed to generate content: {str(e)}")
+    """Generates content; uses Gemini if available, else a local rules-based fallback."""
+    if GEMINI_ENABLED and genai is not None:
+        try:
+            prompt = GEMINI_CONTENT_PROMPT.format(
+                json_data=json.dumps(data, indent=2),
+                feature_descriptions=json.dumps(feature_descriptions, indent=2)
+            )
+            model = genai.GenerativeModel(GEMINI_MODEL)
+            response = model.generate_content(prompt)
+            raw_response = response.text.strip()
+            print("📝 Raw Gemini response received")
+            cleaned_response = clean_json_response(raw_response)
+            content = json.loads(cleaned_response)
+            required_keys = [
+                "skincare_list", "grooming_list", "attractiveness_comment",
+                "positive_features_list", "features_to_improve_list", "other_observations_list"
+            ]
+            for key in required_keys:
+                if key not in content:
+                    if key.endswith("_list"):
+                        content[key] = []
+                    else:
+                        content[key] = ""
+            print("✅ Content validation successful")
+            return content
+        except Exception as e:
+            print(f"⚠️ Warning: Gemini content failed: {str(e)}; using local fallback")
+    return _local_content(data)
 
 def format_list_items(items: List[str]) -> str:
     """Formats a list of items into HTML <li> tags with validation."""

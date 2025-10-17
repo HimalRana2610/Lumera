@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Analysis Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+            color: #2d3748;
+            min-height: 100vh;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #e2e8f0;
+        }
+        
+        header h1 {
+            color: #1a202c;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .timestamp {
+            font-size: 0.95em;
+            color: #718096;
+            font-weight: 500;
+        }
+        
+        .image-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .image-container img {
+            border-radius: 16px;
+            max-width: 280px;
+            height: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 4px solid #f7fafc;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-container img:hover {
+            transform: scale(1.05);
+        }
+        
+        section {
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 16px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        section:hover {
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+            transform: translateX(5px);
+        }
+        
+        section h2 {
+            color: #2d3748;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        section h2 .emoji {
+            font-size: 1.3em;
+        }
+        
+        section p {
+            color: #4a5568;
+            font-size: 1.05em;
+            line-height: 1.8;
+            margin: 10px 0;
+        }
+        
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+        
+        li {
+            margin: 12px 0;
+            padding: 12px 15px;
+            background: white;
+            border-radius: 10px;
+            position: relative;
+            padding-left: 35px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+        
+        li:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateX(3px);
+        }
+        
+        li::before {
+            content: '●';
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.3em;
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .score-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.2em;
+            margin: 10px 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #summary {
+            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+            border-left-color: #f39c12;
+        }
+        
+        #skincare {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left-color: #4caf50;
+        }
+        
+        #grooming {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left-color: #2196f3;
+        }
+        
+        #attractiveness {
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+            border-left-color: #e91e63;
+        }
+        
+        #good_features {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            border-left-color: #9c27b0;
+        }
+        
+        #bad_features {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left-color: #ff9800;
+        }
+        
+        #neutral_features {
+            background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+            border-left-color: #009688;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            section {
+                padding: 20px;
+            }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Facial Feature & Grooming Analysis</h1>
+            <div class="timestamp">Generated: October 16, 2025, 06:08 PM IST</div>
+        </header>
+        
+        <div class="image-container">
+            <img src="http://localhost:8000/static/user_images/camera-capture_20251016_180848_127533.jpg" alt="Subject Image">
+        </div>
+
+        <section id="summary">
+            <h2><span class="emoji">📋</span> Executive Summary</h2>
+            <p>You appear  and male.</p>
+        </section>
+
+        <section id="skincare">
+            <h2><span class="emoji">🧴</span> Skincare Insights</h2>
+            <ul><li>Maintain a consistent, gentle skincare routine.</li></ul>
+        </section>
+
+        <section id="grooming">
+            <h2><span class="emoji">💈</span> Grooming & Hair Insights</h2>
+            <ul><li>Apply beard oil and maintain regular trims for shape.</li></ul>
+        </section>
+
+        <section id="attractiveness" class="hidden">
+            <h2><span class="emoji">🌟</span> Attractiveness Analysis</h2>
+            <div class="score-badge">Score: 0.19/10</div>
+            <p></p>
+        </section>
+
+        <section id="good_features">
+            <h2><span class="emoji">👍</span> Standout Features</h2>
+            <ul><li>Multiple strengths observed across features.</li></ul>
+        </section>
+
+        <section id="bad_features">
+            <h2><span class="emoji">⚠️</span> Areas for Enhancement</h2>
+            <ul><li>Consult a specialist and consider volumizing hairstyles.</li></ul>
+        </section>
+
+        <section id="neutral_features">
+            <h2><span class="emoji">ℹ️</span> Additional Observations</h2>
+            <ul><li>Recommendations are informational and not medical advice.</li></ul>
+        </section>
+        
+        <div class="footer">
+            <p>This report is generated using AI analysis and is for informational purposes only.</p>
+        </div>
+    </div>
+</body>
+</html>

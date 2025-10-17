@@ -76,11 +76,18 @@ const NewUploadArea: React.FC<NewUploadAreaProps> = ({ onImageUpload }) => {
         />
       )}
       
-      <div className="w-full max-w-2xl mx-auto">
+  <div id="upload" className="w-full max-w-2xl mx-auto">
         <div 
-          className={`relative bg-white rounded-3xl shadow-xl border-2 border-dashed transition-all duration-200 ${
-            isDragging ? 'border-cyan-400 bg-cyan-50' : 'border-gray-200 hover:border-cyan-300'
+          className={`relative rounded-3xl shadow-xl border-2 border-dashed transition-all duration-200 ${
+            isDragging ? 'border-[#8B5CF6] bg-[#8B5CF6]/10' : 'border-[#8B5CF6]/40 hover:border-[#8B5CF6]/60'
           }`}
+          style={{
+            background: isDragging 
+              ? 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.15) 100%)'
+              : 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(109,40,217,0.08) 100%)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(139,92,246,0.2)'
+          }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -88,21 +95,21 @@ const NewUploadArea: React.FC<NewUploadAreaProps> = ({ onImageUpload }) => {
         <div className="p-12 text-center">
           {/* Upload Icon */}
           <div className="mb-6 flex justify-center">
-            <div className="bg-cyan-50 rounded-full p-6">
+            <div className="rounded-full p-6" style={{background:'linear-gradient(135deg, rgba(62,231,242,0.15) 0%, rgba(63,211,255,0.15) 100%)'}}>
               <svg width="48" height="48" fill="none" viewBox="0 0 48 48">
-                <rect width="48" height="48" rx="12" fill="#00F0FF" fillOpacity="0.12"/>
-                <path d="M24 16v12m0 0-4-4m4 4 4-4" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M24 32V20M24 20L20 24M24 20L28 24" stroke="#3ee7f2" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M36 28V36C36 37.1 35.1 38 34 38H14C12.9 38 12 37.1 12 36V28" stroke="#3ee7f2" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2" style={{fontFamily:'Poppins, Inter, sans-serif'}}>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-2" style={{fontFamily:'Poppins, Inter, sans-serif'}}>
             Upload or Capture Image
           </h2>
 
           {/* Description */}
-          <p className="text-lg text-gray-500 mb-8">
+          <p className="text-lg text-[#b3b8e0] mb-8">
             Drag and drop an image, or use the buttons below
           </p>
 
@@ -111,11 +118,12 @@ const NewUploadArea: React.FC<NewUploadAreaProps> = ({ onImageUpload }) => {
             {/* Upload Image Button */}
             <button
               onClick={handleUploadClick}
-              className="bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
-              style={{fontFamily:'Poppins, Inter, sans-serif'}}
+              className="bg-gradient-to-r from-[#3ee7f2] to-[#3fd3ff] hover:from-[#3fd3ff] hover:to-[#3ee7f2] text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+              style={{fontFamily:'Poppins, Inter, sans-serif', boxShadow:'0 4px 20px rgba(62,231,242,0.4)'}}
             >
               <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                <path d="M10 2v12m0 0-4-4m4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M10 14V6M10 6L7 9M10 6L13 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M17 12V16C17 16.5 16.5 17 16 17H4C3.5 17 3 16.5 3 16V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               Upload Image
             </button>
@@ -123,12 +131,13 @@ const NewUploadArea: React.FC<NewUploadAreaProps> = ({ onImageUpload }) => {
             {/* Use Camera Button */}
             <button
               onClick={handleCameraClick}
-              className="border-2 border-cyan-400 text-cyan-500 hover:bg-cyan-50 font-bold py-4 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+              className="border-2 border-[#3ee7f2] text-[#3ee7f2] hover:bg-[#3ee7f2]/10 font-bold py-4 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
               style={{fontFamily:'Poppins, Inter, sans-serif'}}
             >
               <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                <path d="M3 7a2 2 0 012-2h2.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 3h4.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.93 5H21a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" stroke="currentColor" strokeWidth="2"/>
-                <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" strokeWidth="2"/>
+                <rect x="2" y="5" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                <circle cx="10" cy="11" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
+                <path d="M7 5L8 3H12L13 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               Use Camera
             </button>
