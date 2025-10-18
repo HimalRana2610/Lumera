@@ -4,14 +4,14 @@ import Image from 'next/image';
 const HeroSection = () => (
   <section className="w-full min-h-[90vh] flex flex-col items-center justify-center py-24 animate-fadeUp bg-gradient-to-br from-[#181c2f] via-[#23244a] to-[#101a2a]">
     <div className="flex flex-col items-center gap-8 w-full max-w-6xl px-4">
-      <div className="bg-gradient-to-br from-[#a084ee] via-[#7f5af0] to-[#6f6ee8] rounded-3xl p-4 shadow-[0_0_48px_0_#a084ee88] animate-float flex items-center justify-center">
+      <div className="bg-gradient-to-br from-[#a084ee] via-[#7f5af0] to-[#6f6ee8] rounded-3xl p-2 shadow-[0_0_48px_0_#a084ee88] animate-float flex items-center justify-center">
         <Image
           src="/logo_new.jpg"
           alt="LUMÉRA AI Logo"
-          width={80}
-          height={80}
-          className="rounded-xl shadow-lg border border-[#8B5CF6] bg-white p-2"
-          style={{ boxShadow: '0 0 15px rgba(139,92,246,0.5)', background: '#fff', padding: '10px', borderWidth: '2px' }}
+          width={120}
+          height={120}
+          className="rounded-xl shadow-lg bg-white"
+          style={{ boxShadow: '0 0 15px rgba(139,92,246,0.5)', background: '#fff', padding: '8px' }}
           unoptimized
           key={Date.now()}
         />

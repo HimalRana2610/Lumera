@@ -31,7 +31,7 @@ export default function RootLayout({
                   alt="LUMERA AI Logo"
                   width={60}
                   height={60}
-                  className="rounded-xl shadow-lg border-2 border-[#8B5CF6] animate-float bg-white p-2"
+                  className="rounded-xl shadow-lg border-2 border-[#8B5CF6] bg-white p-2"
                   style={{ boxShadow: '0 0 15px rgba(139,92,246,0.5)', background: '#fff', padding: '8px' }}
                   unoptimized
                   key={Date.now()}

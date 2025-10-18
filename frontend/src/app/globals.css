@@ -186,3 +186,11 @@ small, .caption {
 ::-webkit-scrollbar { width: 10px; background: transparent;}
 ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,var(--accent-primary),var(--accent-2)); border-radius: 8px;}
 ::selection { background: rgba(45,212,191,0.18); color: var(--background);}
+
+/* Hide Next.js dev overlay watermark */
+nextjs-portal,
+[data-nextjs-dialog-overlay],
+[data-nextjs-toast],
+.__next-dev-indicator {
+  display: none !important;
+}
