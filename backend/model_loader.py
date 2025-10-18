@@ -5,6 +5,10 @@ import torch
 from PIL import Image
 import torchvision.transforms as T
 import timm
+import os
+
+# Import the model download utility
+from download_model import ensure_model_exists
 
 # Define the attributes list
 ATTRIBUTES = [
@@ -43,8 +47,19 @@ def load_model():
     global model
     if model is None:
         print("Loading AI model...")
+        
+        # Ensure model file exists (download if needed)
+        model_path = "./model/convnext_tiny_celeb.pth"
+        if not os.path.exists(model_path):
+            print("Model file not found locally. Attempting to download...")
+            if not ensure_model_exists():
+                raise FileNotFoundError(
+                    f"Model file not found at {model_path} and download failed. "
+                    "Please check your Google Drive URL configuration in download_model.py"
+                )
+        
         model = build_model(len(ATTRIBUTES), backbone="convnext_tiny", pretrained=False)
-        model.load_state_dict(torch.load("./model/convnext_tiny_celeb.pth", map_location=device))
+        model.load_state_dict(torch.load(model_path, map_location=device))
         model = model.to(device)
         model.eval()
         print("Model loaded successfully.")
