@@ -58,7 +58,7 @@ ENHANCED_HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facial Analysis Report</title>
+    <title>LUMÉRA AI - Facial Analysis Report</title>
     <style>
         * {{
             margin: 0;
@@ -67,20 +67,22 @@ ENHANCED_HTML_TEMPLATE = """
         }}
         
         body {{
-            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
-            color: #2d3748;
+            font-family: 'Poppins', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #181c2f 0%, #23244a 50%, #101a2a 100%);
+            color: #e6f6f2;
             min-height: 100vh;
             padding: 40px 20px;
             line-height: 1.6;
         }}
         
         .container {{
-            background: #ffffff;
+            background: linear-gradient(135deg, rgba(35,36,74,0.98) 0%, rgba(160,132,238,0.12) 100%);
+            backdrop-filter: blur(32px) saturate(200%);
             border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2.5px solid #a084ee;
+            box-shadow: 0 20px 60px rgba(160,132,238,0.3), 0 8px 32px rgba(0,0,0,0.5);
             padding: 40px;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             animation: fadeIn 0.6s ease-in;
         }}
@@ -90,19 +92,52 @@ ENHANCED_HTML_TEMPLATE = """
             to {{ opacity: 1; transform: translateY(0); }}
         }}
         
+        @keyframes float {{
+            0%, 100% {{ transform: translateY(0); }}
+            50% {{ transform: translateY(-10px); }}
+        }}
+        
         header {{
             text-align: center;
             margin-bottom: 40px;
             padding-bottom: 30px;
-            border-bottom: 3px solid #e2e8f0;
+            border-bottom: 3px solid rgba(160,132,238,0.3);
+        }}
+        
+        .logo-container {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }}
+        
+        .logo {{
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 0 20px rgba(160,132,238,0.6);
+            animation: float 3s ease-in-out infinite;
+        }}
+        
+        .logo-text {{
+            font-size: 2em;
+            font-weight: 800;
+            background: linear-gradient(90deg, #a084ee 0%, #f472b6 50%, #6ee7b7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
         }}
         
         header h1 {{
-            color: #1a202c;
-            font-size: 2.5em;
+            color: #e6f6f2;
+            font-size: 2em;
             font-weight: 700;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #a084ee 0%, #f472b6 50%, #6ee7b7 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -110,7 +145,7 @@ ENHANCED_HTML_TEMPLATE = """
         
         .timestamp {{
             font-size: 0.95em;
-            color: #718096;
+            color: #b3b8e0;
             font-weight: 500;
         }}
         
@@ -121,10 +156,10 @@ ENHANCED_HTML_TEMPLATE = """
         
         .image-container img {{
             border-radius: 16px;
-            max-width: 280px;
+            max-width: 300px;
             height: auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            border: 4px solid #f7fafc;
+            box-shadow: 0 10px 30px rgba(160,132,238,0.4);
+            border: 3px solid #a084ee;
             transition: transform 0.3s ease;
         }}
         
@@ -135,19 +170,21 @@ ENHANCED_HTML_TEMPLATE = """
         section {{
             margin: 30px 0;
             padding: 25px;
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            background: rgba(35,36,74,0.6);
             border-radius: 16px;
-            border-left: 5px solid #667eea;
+            border-left: 5px solid #a084ee;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }}
         
         section:hover {{
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+            box-shadow: 0 8px 24px rgba(160,132,238,0.3);
             transform: translateX(5px);
+            background: rgba(35,36,74,0.8);
         }}
         
         section h2 {{
-            color: #2d3748;
+            color: #e6f6f2;
             font-size: 1.5em;
             margin-bottom: 15px;
             font-weight: 600;
@@ -161,7 +198,7 @@ ENHANCED_HTML_TEMPLATE = """
         }}
         
         section p {{
-            color: #4a5568;
+            color: #b3b8e0;
             font-size: 1.05em;
             line-height: 1.8;
             margin: 10px 0;
@@ -176,82 +213,84 @@ ENHANCED_HTML_TEMPLATE = """
         li {{
             margin: 12px 0;
             padding: 12px 15px;
-            background: white;
+            background: rgba(24,28,47,0.6);
             border-radius: 10px;
             position: relative;
             padding-left: 35px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             transition: all 0.2s ease;
+            color: #b3b8e0;
         }}
         
         li:hover {{
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(160,132,238,0.2);
             transform: translateX(3px);
+            background: rgba(35,36,74,0.8);
         }}
         
-        li::before {{
-            content: '●';
-            color: #667eea;
-            font-weight: bold;
-            font-size: 1.3em;
+        li.good-feature::before {{
+            content: "✨";
             position: absolute;
             left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-        }}
-        
-        .score-badge {{
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-weight: 700;
+            top: 12px;
             font-size: 1.2em;
-            margin: 10px 0;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }}
         
-        .hidden {{
-            display: none;
+        li.bad-feature::before {{
+            content: "⚠️";
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            font-size: 1.2em;
         }}
         
-        #summary {{
-            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
-            border-left-color: #f39c12;
+        li.neutral-feature::before {{
+            content: "ℹ️";
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            font-size: 1.2em;
         }}
         
-        #skincare {{
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            border-left-color: #4caf50;
+        .section-skincare {{
+            border-left-color: #6ee7b7;
         }}
         
-        #grooming {{
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border-left-color: #2196f3;
+        .section-grooming {{
+            border-left-color: #f472b6;
         }}
         
-        #attractiveness {{
-            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
-            border-left-color: #e91e63;
+        .section-attractiveness {{
+            border-left-color: #7f5af0;
         }}
         
-        #good_features {{
-            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-            border-left-color: #9c27b0;
+        .section-features {{
+            border-left-color: #6f6ee8;
         }}
         
-        #bad_features {{
-            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-            border-left-color: #ff9800;
+        footer {{
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 3px solid rgba(160,132,238,0.3);
+            text-align: center;
+            color: #b3b8e0;
+            font-size: 0.95em;
+            font-weight: 500;
         }}
         
-        #neutral_features {{
-            background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
-            border-left-color: #009688;
+        .footer-brand {{
+            font-weight: 700;
+            background: linear-gradient(90deg, #a084ee 0%, #f472b6 50%, #6ee7b7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }}
         
         @media (max-width: 768px) {{
+            body {{
+                padding: 20px 10px;
+            }}
+            
             .container {{
                 padding: 25px;
             }}
@@ -260,25 +299,48 @@ ENHANCED_HTML_TEMPLATE = """
                 font-size: 1.8em;
             }}
             
+            .logo {{
+                width: 50px;
+                height: 50px;
+            }}
+            
+            .logo-text {{
+                font-size: 1.5em;
+            }}
+            
             section {{
                 padding: 20px;
             }}
+            
+            section h2 {{
+                font-size: 1.3em;
+            }}
         }}
         
-        .footer {{
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #e2e8f0;
-            color: #718096;
-            font-size: 0.9em;
+        @media print {{
+            body {{
+                background: white;
+            }}
+            
+            .container {{
+                box-shadow: none;
+                border: 2px solid #a084ee;
+            }}
+            
+            section {{
+                break-inside: avoid;
+            }}
         }}
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Facial Feature & Grooming Analysis</h1>
+            <div class="logo-container">
+                <img src="/logo_new.jpg" alt="LUMÉRA AI Logo" class="logo">
+                <div class="logo-text">LUMÉRA AI</div>
+            </div>
+            <h1>Facial Analysis Report</h1>
             <div class="timestamp">Generated: {timestamp}</div>
         </header>
         
@@ -286,45 +348,42 @@ ENHANCED_HTML_TEMPLATE = """
             <img src="{image_path}" alt="Subject Image">
         </div>
 
-        <section id="summary">
-            <h2><span class="emoji">📋</span> Executive Summary</h2>
+        <section class="section-summary">
+            <h2><span class="emoji">�</span> Executive Summary</h2>
             <p>{summary_text}</p>
         </section>
 
-        <section id="skincare">
+        <section class="section-skincare">
             <h2><span class="emoji">🧴</span> Skincare Insights</h2>
             <ul>{skincare_list}</ul>
         </section>
 
-        <section id="grooming">
-            <h2><span class="emoji">💈</span> Grooming & Hair Insights</h2>
+        <section class="section-grooming">
+            <h2><span class="emoji">�</span> Grooming & Hair Insights</h2>
             <ul>{grooming_list}</ul>
         </section>
 
-        <section id="attractiveness" class="{attractiveness_class}">
-            <h2><span class="emoji">🌟</span> Attractiveness Analysis</h2>
-            <div class="score-badge">Score: {attractive_score}/10</div>
+        <section class="section-attractiveness">
+            <h2><span class="emoji">⭐</span> Attractiveness Analysis</h2>
             <p>{attractiveness_comment}</p>
         </section>
 
-        <section id="good_features">
-            <h2><span class="emoji">👍</span> Standout Features</h2>
+        <section class="section-features">
+            <h2><span class="emoji">�</span> Feature Analysis</h2>
+            <h3 style="color: #6ee7b7; margin-top: 20px; margin-bottom: 10px; font-size: 1.2em;">👍 Standout Features</h3>
             <ul>{good_features_list}</ul>
-        </section>
-
-        <section id="bad_features">
-            <h2><span class="emoji">⚠️</span> Areas for Enhancement</h2>
+            
+            <h3 style="color: #f472b6; margin-top: 20px; margin-bottom: 10px; font-size: 1.2em;">⚠️ Areas for Enhancement</h3>
             <ul>{bad_features_list}</ul>
-        </section>
-
-        <section id="neutral_features">
-            <h2><span class="emoji">ℹ️</span> Additional Observations</h2>
+            
+            <h3 style="color: #b3b8e0; margin-top: 20px; margin-bottom: 10px; font-size: 1.2em;">ℹ️ Additional Observations</h3>
             <ul>{neutral_features_list}</ul>
         </section>
         
-        <div class="footer">
-            <p>This report is generated using AI analysis and is for informational purposes only.</p>
-        </div>
+        <footer>
+            <p>Generated by <span class="footer-brand">LUMÉRA AI</span> - Advanced Facial Analysis System</p>
+            <p style="margin-top: 8px; font-size: 0.85em; color: #8b93c0;">Powered by AI-driven computer vision and analysis</p>
+        </footer>
     </div>
 </body>
 </html>
@@ -369,8 +428,9 @@ STYLE GUIDELINES:
 - Don't use phrases like "The user has dark circle" instead use "You have signs of dark circles"
 FACIAL ANALYSIS DATA:
 {data_str}
-
+Additionally don't start like Here's a professional summary based on the facial analysis: or something like this directly write the actual analysis,
 Generate the summary now:
+
 """
 
 GEMINI_CONTENT_PROMPT = """
