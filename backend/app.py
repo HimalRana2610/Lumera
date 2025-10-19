@@ -7,6 +7,17 @@ from fastapi import Request
 import io
 import os
 import datetime
+
+# CRITICAL: Ensure model_loader.py is available before importing
+# This allows storing sensitive model code in Google Drive instead of GitHub
+import sys
+from download_code import ensure_model_loader_exists
+
+if not ensure_model_loader_exists():
+    print("❌ CRITICAL: model_loader.py is required but not available")
+    print("   Please configure MODEL_LOADER_URL in backend/.env")
+    sys.exit(1)
+
 from model_loader import predict_attributes_from_bytes, load_model
 from Gemini import (
     configure_gemini,
