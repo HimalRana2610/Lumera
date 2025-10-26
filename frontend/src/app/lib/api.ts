@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000'; // FastAPI backend URL
+const API_BASE_URL = 'https://lumera-2.onrender.com/'; // FastAPI backend URL
 
 export const uploadImageForAnalysis = async (file: File) => {
   const formData = new FormData();
