@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://lumera-2.onrender.com/'; // FastAPI backend URL
+const API_BASE_URL = 'http://localhost:8000'; // FastAPI backend URL
 
 export const uploadImageForAnalysis = async (file: File) => {
   const formData = new FormData();
@@ -9,8 +9,13 @@ export const uploadImageForAnalysis = async (file: File) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/predict`, formData);
     return response.data;
-  } catch (err: any) {
-    const message = err?.response?.data?.detail || err?.message || 'Upload failed';
+  } catch (err: unknown) {
+    let message = 'Upload failed';
+    if (axios.isAxiosError(err)) {
+      message = err.response?.data?.detail || err.message || message;
+    } else if (err instanceof Error) {
+      message = err.message;
+    }
     throw new Error(message);
   }
 };
@@ -21,8 +26,13 @@ export const recordConsent = async (filename: string) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/consent`, { filename });
     return response.data;
-  } catch (err: any) {
-    const message = err?.response?.data?.detail || err?.message || 'Consent failed';
+  } catch (err: unknown) {
+    let message = 'Consent failed';
+    if (axios.isAxiosError(err)) {
+      message = err.response?.data?.detail || err.message || message;
+    } else if (err instanceof Error) {
+      message = err.message;
+    }
     throw new Error(message);
   }
 };
