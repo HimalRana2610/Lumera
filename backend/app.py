@@ -4,21 +4,21 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Body
 from fastapi import Request
+import requests
+import sys
+
 import io
 import os
+sys.path.append(os.path.dirname(__file__))
+from test import test_api
+
 import datetime
 
 # CRITICAL: Ensure model_loader.py is available before importing
 # This allows storing sensitive model code in Google Drive instead of GitHub
 import sys
-from download_code import ensure_model_loader_exists
 
-if not ensure_model_loader_exists():
-    print("❌ CRITICAL: model_loader.py is required but not available")
-    print("   Please configure MODEL_LOADER_URL in backend/.env")
-    sys.exit(1)
 
-from model_loader import predict_attributes_from_bytes, load_model
 from Gemini import (
     configure_gemini,
     generate_summary as gemini_generate_summary,
@@ -47,7 +47,6 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Load the model when the app starts
 print("Loading AI model...")
-model = load_model()
 print("Model loaded successfully!")
 
 # CORS configuration
@@ -69,76 +68,61 @@ app.add_middleware(
 async def predict(request: Request, file: UploadFile = File(...)):
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
-    
-    # Read image bytes
-    image_bytes = await file.read()
 
-    # Step 0: Save upload to a temp file and crop using temp.crop_face()
-    original_filename = os.path.basename(file.filename or "uploaded.jpg")
-    name_root, _ = os.path.splitext(original_filename)
+    # Save uploaded image for reference
+    name_root, _ = os.path.splitext(file.filename or "uploaded.jpg")
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     output_filename = f"{name_root}_{timestamp}.jpg"
     output_path = os.path.join(USER_IMAGES_DIR, output_filename)
+    image_bytes = await file.read()
+    with open(output_path, "wb") as f_out:
+        f_out.write(image_bytes)
+    cropped_image_data_url = "data:image/jpeg;base64," + base64.b64encode(image_bytes).decode("utf-8")
 
-    # Write uploaded bytes to a temporary file path for the cropper
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
-        tmp.write(image_bytes)
-        tmp_path = tmp.name
-
+    # Use test_api to get prediction from Hugging Face
     try:
-        # Use the required cropper; this may raise ValueError if no face visible
-        cropped_path = crop_face(tmp_path, output_path=output_path, expand_ratio=0.3)
-    except ValueError:
-        # Specific message required by product
-        raise HTTPException(status_code=400, detail="face is not visible please try again")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Cropping failed: {str(e)}")
-    finally:
-        # Clean up temp file
-        try:
-            os.remove(tmp_path)
-        except Exception:
-            pass
+        prediction = test_api(output_path)
+        print("[DEBUG] Hugging Face prediction:", prediction)
+        if prediction is None:
+            print("[ERROR] No prediction returned from Hugging Face API.")
+            raise HTTPException(status_code=500, detail="No prediction returned from Hugging Face API.")
 
-    # Read cropped image bytes
-    try:
-        with open(cropped_path, "rb") as f:
-            cropped_bytes = f.read()
-    except Exception:
-        raise HTTPException(status_code=500, detail="Failed to read cropped image.")
-
-    image_bytes = cropped_bytes
-    cropped_image_data_url = "data:image/jpeg;base64," + base64.b64encode(cropped_bytes).decode("utf-8")
-    
-    try:
-        # Step 1: Get model predictions
-        prediction = predict_attributes_from_bytes(image_bytes)
-        
-        if "error" in prediction:
-            raise HTTPException(status_code=500, detail=f"Model prediction failed: {prediction['error']}")
-
-        # Step 2: Generate summary and content using Gemini + attribute mapping
+        # Step 1: Generate summary
         try:
             configure_gemini()
+            print("[DEBUG] Gemini configured successfully.")
         except Exception as e:
+            print(f"[ERROR] Gemini configuration failed: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Gemini configuration failed: {str(e)}")
 
         mapping_path = os.path.join(BASE_DIR, "attribute_mapping.json")
         try:
             feature_descriptions = gemini_load_json_file(mapping_path)
+            print("[DEBUG] Attribute mapping loaded.")
         except Exception as e:
+            print(f"[ERROR] Failed to load attribute mapping: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to load attribute mapping: {str(e)}")
 
-        summary_text = gemini_generate_summary(prediction)
-        content_sections = gemini_generate_content(prediction, feature_descriptions)
+        try:
+            summary_text = gemini_generate_summary(prediction)
+            print("[DEBUG] Summary generated.")
+        except Exception as e:
+            print(f"[ERROR] Summary generation failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Summary generation failed: {str(e)}")
 
-        # Step 3: Generate HTML report and save under static/reports
+        try:
+            content_sections = gemini_generate_content(prediction, feature_descriptions)
+            print("[DEBUG] Content sections generated.")
+        except Exception as e:
+            print(f"[ERROR] Content generation failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Content generation failed: {str(e)}")
+
+        # Step 2: Generate HTML report and save under static/reports
         report_filename = f"report_{name_root}_{timestamp}.html"
         report_path = os.path.join(REPORTS_DIR, report_filename)
+        base_url_for_image = str(request.base_url).rstrip('/')
+        absolute_image_url = f"{base_url_for_image}/static/user_images/{output_filename}"
         try:
-            # Build absolute image URL for HTML
-            base_url_for_image = str(request.base_url).rstrip('/')
-            absolute_image_url = f"{base_url_for_image}/static/user_images/{output_filename}"
             html = gemini_generate_html_report(
                 data=prediction,
                 summary=summary_text,
@@ -147,15 +131,16 @@ async def predict(request: Request, file: UploadFile = File(...)):
             )
             with open(report_path, "w", encoding="utf-8") as rf:
                 rf.write(html)
+            print("[DEBUG] HTML report generated and saved.")
         except Exception as e:
+            print(f"[ERROR] Failed to generate HTML report: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to generate HTML report: {str(e)}")
 
-        # Build absolute URLs for frontend use
         base_url = str(request.base_url).rstrip('/')
         report_url = f"{base_url}/static/reports/{report_filename}"
         cropped_image_url = f"{base_url}/static/user_images/{output_filename}"
 
-        # Return comprehensive analysis
+        print("[DEBUG] Returning JSON response.")
         return JSONResponse(content={
             "success": True,
             "prediction": prediction,
@@ -168,8 +153,8 @@ async def predict(request: Request, file: UploadFile = File(...)):
             "cropped_image_url": cropped_image_url,
             "cropped_image_filename": output_filename
         })
-        
     except Exception as e:
+        print(f"[ERROR] Analysis failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 ## Removed legacy PDF report endpoint
