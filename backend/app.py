@@ -58,7 +58,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://lumera-frontend.onrender.com"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -77,11 +77,21 @@ async def predict(request: Request, file: UploadFile = File(...)):
     image_bytes = await file.read()
     with open(output_path, "wb") as f_out:
         f_out.write(image_bytes)
-    cropped_image_data_url = "data:image/jpeg;base64," + base64.b64encode(image_bytes).decode("utf-8")
 
-    # Use test_api to get prediction from Hugging Face
+    # Crop the face from the uploaded image
+    cropped_output_path = os.path.join(USER_IMAGES_DIR, f"cropped_{output_filename}")
     try:
-        prediction = test_api(output_path)
+        crop_face(output_path, cropped_output_path, expand_ratio=0.3)
+        with open(cropped_output_path, "rb") as cf:
+            cropped_image_bytes = cf.read()
+        cropped_image_data_url = "data:image/jpeg;base64," + base64.b64encode(cropped_image_bytes).decode("utf-8")
+    except Exception as e:
+        print(f"[ERROR] Cropping failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Cropping failed: {str(e)}")
+
+    # Use test_api to get prediction from Hugging Face using cropped image
+    try:
+        prediction = test_api(cropped_output_path)
         print("[DEBUG] Hugging Face prediction:", prediction)
         if prediction is None:
             print("[ERROR] No prediction returned from Hugging Face API.")
@@ -188,9 +198,11 @@ async def consent(request: Request, data: dict = Body(...)):
     base_url = str(request.base_url).rstrip('/')
     return {"success": True, "accepted_image_url": f"{base_url}/static/accepted/{os.path.basename(filename)}"}
 
-import os
 
+
+import os
+import uvicorn
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    import uvicorn
+    
     uvicorn.run("app:app", host="0.0.0.0", port=port)
