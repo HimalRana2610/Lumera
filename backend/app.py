@@ -187,3 +187,10 @@ async def consent(request: Request, data: dict = Body(...)):
 
     base_url = str(request.base_url).rstrip('/')
     return {"success": True, "accepted_image_url": f"{base_url}/static/accepted/{os.path.basename(filename)}"}
+
+import os
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    import uvicorn
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
