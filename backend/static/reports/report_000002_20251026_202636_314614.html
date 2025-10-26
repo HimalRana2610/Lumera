@@ -1,0 +1,345 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMÉRA AI - Facial Analysis Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #181c2f 0%, #23244a 50%, #101a2a 100%);
+            color: #e6f6f2;
+            min-height: 100vh;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            background: linear-gradient(135deg, rgba(35,36,74,0.98) 0%, rgba(160,132,238,0.12) 100%);
+            backdrop-filter: blur(32px) saturate(200%);
+            border-radius: 24px;
+            border: 2.5px solid #a084ee;
+            box-shadow: 0 20px 60px rgba(160,132,238,0.3), 0 8px 32px rgba(0,0,0,0.5);
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid rgba(160,132,238,0.3);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 0 20px rgba(160,132,238,0.6);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .logo-text {
+            font-size: 2em;
+            font-weight: 800;
+            background: linear-gradient(90deg, #a084ee 0%, #f472b6 50%, #6ee7b7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+        
+        header h1 {
+            color: #e6f6f2;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #a084ee 0%, #f472b6 50%, #6ee7b7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .timestamp {
+            font-size: 0.95em;
+            color: #b3b8e0;
+            font-weight: 500;
+        }
+        
+        .image-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .image-container img {
+            border-radius: 16px;
+            max-width: 300px;
+            height: auto;
+            box-shadow: 0 10px 30px rgba(160,132,238,0.4);
+            border: 3px solid #a084ee;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-container img:hover {
+            transform: scale(1.05);
+        }
+        
+        section {
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(35,36,74,0.6);
+            border-radius: 16px;
+            border-left: 5px solid #a084ee;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        section:hover {
+            box-shadow: 0 8px 24px rgba(160,132,238,0.3);
+            transform: translateX(5px);
+            background: rgba(35,36,74,0.8);
+        }
+        
+        section h2 {
+            color: #e6f6f2;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        section h2 .emoji {
+            font-size: 1.3em;
+        }
+        
+        section p {
+            color: #b3b8e0;
+            font-size: 1.05em;
+            line-height: 1.8;
+            margin: 10px 0;
+        }
+        
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+        
+        li {
+            margin: 12px 0;
+            padding: 12px 15px;
+            background: rgba(24,28,47,0.6);
+            border-radius: 10px;
+            position: relative;
+            padding-left: 35px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            color: #b3b8e0;
+        }
+        
+        li:hover {
+            box-shadow: 0 4px 12px rgba(160,132,238,0.2);
+            transform: translateX(3px);
+            background: rgba(35,36,74,0.8);
+        }
+        
+        li.good-feature::before {
+            content: "✨";
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            font-size: 1.2em;
+        }
+        
+        li.bad-feature::before {
+            content: "⚠️";
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            font-size: 1.2em;
+        }
+        
+        li.neutral-feature::before {
+            content: "ℹ️";
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            font-size: 1.2em;
+        }
+        
+        .section-skincare {
+            border-left-color: #6ee7b7;
+        }
+        
+        .section-grooming {
+            border-left-color: #f472b6;
+        }
+        
+        .section-attractiveness {
+            border-left-color: #7f5af0;
+        }
+        
+        .section-features {
+            border-left-color: #6f6ee8;
+        }
+        
+        footer {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 3px solid rgba(160,132,238,0.3);
+            text-align: center;
+            color: #b3b8e0;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+        
+        .footer-brand {
+            font-weight: 700;
+            background: linear-gradient(90deg, #a084ee 0%, #f472b6 50%, #6ee7b7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .container {
+                padding: 25px;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .logo-text {
+                font-size: 1.5em;
+            }
+            
+            section {
+                padding: 20px;
+            }
+            
+            section h2 {
+                font-size: 1.3em;
+            }
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                border: 2px solid #a084ee;
+            }
+            
+            section {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="/logo_new.jpg" alt="LUMÉRA AI Logo" class="logo">
+                <div class="logo-text">LUMÉRA AI</div>
+            </div>
+            <h1>Facial Analysis Report</h1>
+            <div class="timestamp">Generated: October 26, 2025, 08:26 PM IST</div>
+        </header>
+        
+        <div class="image-container">
+            <img src="http://localhost:8000/static/user_images/000002_20251026_202636_314614.jpg" alt="Subject Image">
+        </div>
+
+        <section class="section-summary">
+            <h2><span class="emoji">�</span> Executive Summary</h2>
+            <p>You possess a captivating appearance, enhanced by well-defined high cheekbones. Your clear skin contributes to a healthy and radiant look. You present yourself as well-groomed, often complemented by skillfully applied makeup. Your dark hair cascades beautifully, adding to your overall charm. While your smile is radiant and inviting, you show slight signs of dark circles. Your dry skin texture might benefit from tailored skincare.</p>
+        </section>
+
+        <section class="section-skincare">
+            <h2><span class="emoji">🧴</span> Skincare Insights</h2>
+            <ul><li>Address the dark circles with an eye cream containing caffeine or vitamin C.</li>
+<li>Since dry skin was detected, use a hydrating moisturizer regularly.</li>
+<li>Maintain clear skin by continuing with consistent hydration and sun protection.</li></ul>
+        </section>
+
+        <section class="section-grooming">
+            <h2><span class="emoji">�</span> Grooming & Hair Insights</h2>
+            <ul><li>Ensure gentle makeup removal to protect skin health.</li>
+<li>Maintain well-groomed appearance with consistent hair maintenance.</li>
+<li>Continue to maintain a well-groomed appearance.</li></ul>
+        </section>
+
+        <section class="section-attractiveness">
+            <h2><span class="emoji">⭐</span> Attractiveness Analysis</h2>
+            <p>This individual possesses a striking appearance with high cheekbones and clear skin. The well-groomed presentation enhances their overall attractiveness and projects an image of confidence and self-care. Maintain these qualities to further enhance your appeal.</p>
+        </section>
+
+        <section class="section-features">
+            <h2><span class="emoji">�</span> Feature Analysis</h2>
+            <h3 style="color: #6ee7b7; margin-top: 20px; margin-bottom: 10px; font-size: 1.2em;">👍 Standout Features</h3>
+            <ul><li>High cheekbones</li>
+<li>Clear skin</li>
+<li>Smiling expression</li>
+<li>Well-groomed appearance</li></ul>
+            
+            <h3 style="color: #f472b6; margin-top: 20px; margin-bottom: 10px; font-size: 1.2em;">⚠️ Areas for Enhancement</h3>
+            <ul><li>Consider addressing dark circles to brighten the under-eye area.</li>
+<li>Continue hydrating dry skin for optimal skin health.</li></ul>
+            
+            <h3 style="color: #b3b8e0; margin-top: 20px; margin-bottom: 10px; font-size: 1.2em;">ℹ️ Additional Observations</h3>
+            <ul><li>Makeup was detected, suggesting attention to detail.</li>
+<li>The individual has long, black hair.</li>
+<li>The mouth is open, possibly smiling or speaking.</li></ul>
+        </section>
+        
+        <footer>
+            <p>Generated by <span class="footer-brand">LUMÉRA AI</span> - Advanced Facial Analysis System</p>
+            <p style="margin-top: 8px; font-size: 0.85em; color: #8b93c0;">Powered by AI-driven computer vision and analysis</p>
+        </footer>
+    </div>
+</body>
+</html>
