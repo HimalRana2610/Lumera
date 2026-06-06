@@ -85,6 +85,7 @@ Verify it's up: open http://localhost:8000/health → `{"status":"healthy", ...}
 | `GEMINI_API_KEY`  | Yes      | Google Gemini API key used to generate summaries & reports. If unset, the backend falls back to a built-in rules-based generator. |
 | `GEMINI_MODEL`    | No       | Override the Gemini model (default `gemini-2.0-flash-exp`). |
 | `HF_API_SECRET_KEY` | No     | Secret key for the Hugging Face prediction Space, if the Space requires one. |
+| `FRONTEND_ORIGINS` | No      | Extra CORS origins (comma-separated) allowed to call the API, in addition to localhost and the deployed frontend. |
 | `PORT`            | No       | Port for Uvicorn when run via `python app.py` (default `8000`). |
 
 ## Frontend setup

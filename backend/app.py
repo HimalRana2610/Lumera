@@ -45,15 +45,20 @@ print("Loading AI model...")
 print("Model loaded successfully!")
 
 # CORS configuration
+# Local dev origins plus the deployed frontend. Add more via the
+# FRONTEND_ORIGINS env var (comma-separated) without changing code.
 origins = [
-    "http://localhost:3000",  # React app default port
-    "http://localhost:8000",  # FastAPI default port
-    "http://127.0.0.1:3000",  # Allow loopback host as well
+    "http://localhost:3000",   # Next.js dev server
+    "http://127.0.0.1:3000",   # loopback host
+    "https://lumera-frontend.onrender.com",  # deployed frontend
 ]
+extra_origins = os.environ.get("FRONTEND_ORIGINS", "")
+if extra_origins:
+    origins.extend(o.strip() for o in extra_origins.split(",") if o.strip())
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://lumera-frontend.onrender.com"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
