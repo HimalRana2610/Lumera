@@ -14,11 +14,6 @@ from test import test_api
 
 import datetime
 
-# CRITICAL: Ensure model_loader.py is available before importing
-# This allows storing sensitive model code in Google Drive instead of GitHub
-import sys
-
-
 from Gemini import (
     configure_gemini,
     generate_summary as gemini_generate_summary,

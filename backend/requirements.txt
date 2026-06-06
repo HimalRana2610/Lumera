@@ -22,7 +22,6 @@ pydantic==2.12.2
 pydantic_core==2.41.4
 python-multipart==0.0.20
 PyYAML==6.0.3
-reportlab==4.4.4
 requests==2.32.5
 safetensors==0.6.2
 setuptools==70.2.0
@@ -36,4 +35,3 @@ urllib3==2.5.0
 uvicorn==0.37.0
 google-generativeai==0.8.3
 python-dotenv==1.0.1
-gdown==5.2.0
