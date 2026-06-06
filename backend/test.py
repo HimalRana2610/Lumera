@@ -1,35 +1,31 @@
-import requests
 import os
-import json
+import requests
+from dotenv import load_dotenv
 
-# 1. Set the URL of your PUBLIC deployed API
-API_URL = "https://shreyansh313-grin.hf.space/predict"
+# Load environment variables from .env (works whether imported by app.py or run directly)
+load_dotenv()
+_ENV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+if os.path.exists(_ENV_PATH):
+    load_dotenv(dotenv_path=_ENV_PATH, override=False)
 
-# 2. Set your secret API key
-#    !!!! IMPORTANT !!!!
-#    This MUST match the value you set in your Hugging Face Space "Secrets"
-MY_SECRET_KEY = os.getenv("HF_API_SECRET_KEY") # <-- CHANGE THIS to your secret
+# Default kept so the app works out of the box; override with HF_API_URL in .env
+DEFAULT_API_URL = "https://shreyansh313-grin.hf.space/predict"
 
-# 3. Set the path to the image you want to test
-IMAGE_PATH = "C:\\new pc\\ML project\\Lumera\\backend\\static\\user_images\\pic1_20251017_002003_938173.jpg" # I used the path from your log
 
 def test_api(image_path):
-    """
-    Sends an image to the secured public endpoint and prints the result.
-    """
+    """Send an image to the Hugging Face prediction Space and return the JSON result."""
+    api_url = os.getenv("HF_API_URL", DEFAULT_API_URL)
+    api_key = os.getenv("HF_API_SECRET_KEY")  # only needed if the Space enforces it
+
     if not os.path.exists(image_path):
         print(f"❌ Error: Image file not found at {image_path}")
-        print("Please update the IMAGE_PATH variable to a valid file path.")
-        return
-    
-    if MY_SECRET_KEY == "my_super_secret_key_12345":
-        print("⚠️ WARNING: Please update the 'MY_SECRET_KEY' variable in this script.")
+        return None
 
     try:
-        headers = {"x-api-key": MY_SECRET_KEY}
+        headers = {"x-api-key": api_key} if api_key else {}
         with open(image_path, "rb") as image_file:
             files_payload = {"image": (os.path.basename(image_path), image_file)}
-            response = requests.post(API_URL, files=files_payload, headers=headers)
+            response = requests.post(api_url, files=files_payload, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as http_err:
@@ -42,6 +38,11 @@ def test_api(image_path):
         print(f"Unexpected error: {e}")
         return None
 
-# Run the test
+
+# Ad-hoc CLI test: set TEST_IMAGE_PATH in your environment, then run `python test.py`
 if __name__ == "__main__":
-    test_api(IMAGE_PATH)
+    image_path = os.getenv("TEST_IMAGE_PATH", "")
+    if not image_path:
+        print("Set TEST_IMAGE_PATH to an image file path to run a standalone test.")
+    else:
+        print(test_api(image_path))

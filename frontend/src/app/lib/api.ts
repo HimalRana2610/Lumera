@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://lumera-2.onrender.com'; // FastAPI backend URL
+// Backend API URL — configure via NEXT_PUBLIC_API_BASE_URL in frontend/.env.local
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export const uploadImageForAnalysis = async (file: File) => {
   const formData = new FormData();

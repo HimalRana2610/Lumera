@@ -83,9 +83,10 @@ Verify it's up: open http://localhost:8000/health → `{"status":"healthy", ...}
 | Variable          | Required | Description |
 |-------------------|----------|-------------|
 | `GEMINI_API_KEY`  | Yes      | Google Gemini API key used to generate summaries & reports. If unset, the backend falls back to a built-in rules-based generator. |
-| `GEMINI_MODEL`    | No       | Override the Gemini model (default `gemini-2.0-flash-exp`). |
-| `HF_API_SECRET_KEY` | No     | Secret key for the Hugging Face prediction Space, if the Space requires one. |
-| `FRONTEND_ORIGINS` | No      | Extra CORS origins (comma-separated) allowed to call the API, in addition to localhost and the deployed frontend. |
+| `GEMINI_MODEL`    | No       | Override the Gemini model (default `gemini-2.5-flash`). |
+| `HF_API_URL`      | No       | Hugging Face prediction Space endpoint (image → attribute JSON). Defaults to the bundled Space URL. |
+| `HF_API_SECRET_KEY` | No     | `x-api-key` secret for the Hugging Face Space, only if the Space requires one. |
+| `FRONTEND_ORIGINS` | No      | Comma-separated production frontend origins allowed by CORS (localhost is always allowed for dev). |
 | `PORT`            | No       | Port for Uvicorn when run via `python app.py` (default `8000`). |
 
 ## Frontend setup
@@ -98,7 +99,13 @@ npm run dev
 
 Open http://localhost:3000.
 
-> **Note:** The backend URL the frontend talks to is set in [frontend/src/app/lib/api.ts](frontend/src/app/lib/api.ts) (`API_BASE_URL`). For local development point it at `http://localhost:8000`; it currently defaults to the deployed backend.
+### Environment variables (`frontend/.env.local`)
+
+Copy `frontend/.env.example` to `frontend/.env.local` and set:
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_API_BASE_URL` | Backend API URL the frontend calls. Local dev: `http://localhost:8000`; production: your deployed backend URL. Falls back to `http://localhost:8000` if unset. |
 
 ## API endpoints
 
@@ -115,4 +122,7 @@ Open http://localhost:3000.
 
 ## Deployment notes
 
-The app is designed for platforms like Render. Set `GEMINI_API_KEY` (and any other variables above) in the platform's environment settings, and update the CORS `allow_origins` in [backend/app.py](backend/app.py) plus `API_BASE_URL` in the frontend to match your deployed URLs.
+The app is designed for platforms like Render. All configuration is via environment variables — set them in the platform's settings rather than hardcoding:
+
+- **Backend:** `GEMINI_API_KEY`, and `FRONTEND_ORIGINS` = your deployed frontend URL (so CORS allows it). Optionally `GEMINI_MODEL`, `HF_API_URL`, `HF_API_SECRET_KEY`.
+- **Frontend:** `NEXT_PUBLIC_API_BASE_URL` = your deployed backend URL.

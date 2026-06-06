@@ -12,6 +12,16 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
   const webcamRef = useRef<Webcam>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+
+  const handleUserMediaError = useCallback(() => {
+    const insecure = typeof window !== 'undefined' && !window.isSecureContext;
+    setCameraError(
+      insecure
+        ? 'Camera blocked. Browsers only allow the camera over HTTPS (or on localhost). This page is being served over plain HTTP, so the camera can’t start. Open the site over HTTPS, or use "Upload a photo" instead.'
+        : 'Could not access the camera. Please allow camera permission in your browser settings, or use "Upload a photo" instead.'
+    );
+  }, []);
 
   const capture = useCallback(() => {
     if (webcamRef.current) {
@@ -57,13 +67,23 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onClose }) => 
 
         {/* Camera/Image Preview */}
         <div className="p-4">
-          {!capturedImage ? (
+          {cameraError && !capturedImage ? (
+            <div className="bg-black rounded-xl overflow-hidden h-80 flex flex-col items-center justify-center text-center p-6 gap-3">
+              <svg width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="#f472b6">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                <path strokeLinecap="round" strokeWidth={2} d="M3 3l18 18" />
+              </svg>
+              <p className="text-[#e6f6f2] font-semibold">Camera unavailable</p>
+              <p className="caption text-[#b3b8e0]">{cameraError}</p>
+            </div>
+          ) : !capturedImage ? (
             <div className="relative bg-black rounded-xl overflow-hidden">
               <Webcam
                 audio={false}
                 ref={webcamRef}
                 screenshotFormat="image/jpeg"
                 className="w-full h-80 object-cover"
+                onUserMediaError={handleUserMediaError}
                 videoConstraints={{
                   width: { ideal: 1280 },
                   height: { ideal: 720 },

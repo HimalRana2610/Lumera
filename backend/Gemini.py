@@ -2,7 +2,7 @@ import json
 import os
 from typing import Dict, Any, List, Optional
 try:
-    import google.generativeai as genai  # type: ignore
+    from google import genai  # type: ignore
 except Exception:
     genai = None
 from datetime import datetime
@@ -22,16 +22,17 @@ try:
 except Exception:
     # Non-fatal: we will still rely on existing env if present
     pass
-GEMINI_MODEL = "gemini-2.0-flash-exp"
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 GEMINI_ENABLED = False
+_client = None  # google.genai Client, created in configure_gemini()
 
 def configure_gemini() -> bool:
     """Configures the Gemini API client. Falls back gracefully if unavailable."""
-    global GEMINI_ENABLED
+    global GEMINI_ENABLED, _client
     # If package import failed, we cannot use Gemini
     if genai is None:
         GEMINI_ENABLED = False
-        print("⚠️ google.generativeai not available; using local fallback generation")
+        print("⚠️ google-genai not available; using local fallback generation")
         return False
     try:
         api_key = os.getenv("GEMINI_API_KEY")
@@ -39,7 +40,7 @@ def configure_gemini() -> bool:
             GEMINI_ENABLED = False
             print("⚠️ GEMINI_API_KEY not set; using local fallback generation")
             return False
-        genai.configure(api_key=api_key)
+        _client = genai.Client(api_key=api_key)
         GEMINI_ENABLED = True
         print("✅ Gemini API configured successfully")
         return True
@@ -337,7 +338,7 @@ ENHANCED_HTML_TEMPLATE = """
     <div class="container">
         <header>
             <div class="logo-container">
-                <img src="/logo_new.jpg" alt="LUMÉRA AI Logo" class="logo">
+                <img src="/static/logo_new.jpg" alt="LUMÉRA AI Logo" class="logo">
                 <div class="logo-text">LUMÉRA AI</div>
             </div>
             <h1>Facial Analysis Report</h1>
@@ -349,7 +350,7 @@ ENHANCED_HTML_TEMPLATE = """
         </div>
 
         <section class="section-summary">
-            <h2><span class="emoji">�</span> Executive Summary</h2>
+            <h2><span class="emoji">📊</span> Executive Summary</h2>
             <p>{summary_text}</p>
         </section>
 
@@ -359,7 +360,7 @@ ENHANCED_HTML_TEMPLATE = """
         </section>
 
         <section class="section-grooming">
-            <h2><span class="emoji">�</span> Grooming & Hair Insights</h2>
+            <h2><span class="emoji">💇</span> Grooming & Hair Insights</h2>
             <ul>{grooming_list}</ul>
         </section>
 
@@ -369,7 +370,7 @@ ENHANCED_HTML_TEMPLATE = """
         </section>
 
         <section class="section-features">
-            <h2><span class="emoji">�</span> Feature Analysis</h2>
+            <h2><span class="emoji">🔍</span> Feature Analysis</h2>
             <h3 style="color: #6ee7b7; margin-top: 20px; margin-bottom: 10px; font-size: 1.2em;">👍 Standout Features</h3>
             <ul>{good_features_list}</ul>
             
@@ -509,6 +510,55 @@ FEATURE DESCRIPTIONS:
 Generate the JSON response now:
 """
 
+# Combined prompt: produces the summary AND all content sections in ONE request
+# (halves Gemini API usage compared to calling summary + content separately).
+GEMINI_COMBINED_PROMPT = """
+You are a professional facial analysis expert and grooming consultant. From the facial
+analysis data (and the feature descriptions), produce BOTH an executive summary and the
+detailed report sections in a SINGLE JSON object.
+
+Return ONLY a valid JSON object with this EXACT structure:
+
+{{
+  "summary": "80-120 word executive summary",
+  "skincare_list": ["insight 1", "insight 2", "insight 3"],
+  "grooming_list": ["insight 1", "insight 2", "insight 3"],
+  "attractiveness_comment": "detailed comment here or empty string",
+  "positive_features_list": ["feature 1", "feature 2", "feature 3"],
+  "features_to_improve_list": ["suggestion 1", "suggestion 2"],
+  "other_observations_list": ["observation 1", "observation 2"]
+}}
+
+GUIDELINES:
+
+summary:
+- 80-120 words, warm, professional, positive, written in second person ("You have ...").
+- Cover key demographics, prominent facial features, and notable hair and skin traits.
+- Do NOT include raw percentages, probabilities, or technical jargon.
+- Do NOT start with "Here's a summary..."; write the analysis directly.
+
+skincare_list: 2-4 specific, actionable skincare recommendations from skin-related features.
+grooming_list: 2-4 practical grooming suggestions (hair, facial hair, eyebrows).
+attractiveness_comment: ONLY if attractiveness probability > 0.7, write 2-3 genuine sentences; otherwise "".
+positive_features_list: 3-5 strongest features, specific and positive.
+features_to_improve_list: 2-4 gentle, constructive enhancement opportunities.
+other_observations_list: 2-3 neutral, informative observations.
+
+CRITICAL RULES:
+- Return ONLY valid JSON, no extra text, no markdown.
+- Use proper JSON escaping for quotes inside strings.
+- Empty sections: use [] or "".
+- Be empathetic and constructive; avoid technical jargon throughout.
+
+FACIAL ANALYSIS DATA:
+{json_data}
+
+FEATURE DESCRIPTIONS:
+{feature_descriptions}
+
+Generate the JSON response now:
+"""
+
 # ============================================================
 # UTILITY FUNCTIONS
 # ============================================================
@@ -578,12 +628,11 @@ def _local_summary(data: Dict[str, Any]) -> str:
 
 def generate_summary(data: Dict[str, Any]) -> str:
     """Generates a short summary; uses Gemini if available, else local fallback."""
-    if GEMINI_ENABLED and genai is not None:
+    if GEMINI_ENABLED and _client is not None:
         try:
             data_str = json.dumps(data, indent=2)
             prompt = GEMINI_SUMMARY_PROMPT.format(data_str=data_str)
-            model = genai.GenerativeModel(GEMINI_MODEL)
-            response = model.generate_content(prompt)
+            response = _client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
             summary = response.text.strip()
             print(f"✅ Generated summary ({len(summary)} characters)")
             return summary
@@ -632,14 +681,13 @@ def _local_content(data: Dict[str, Any]) -> Dict[str, Any]:
 
 def generate_content(data: Dict[str, Any], feature_descriptions: Dict[str, Any]) -> Dict[str, Any]:
     """Generates content; uses Gemini if available, else a local rules-based fallback."""
-    if GEMINI_ENABLED and genai is not None:
+    if GEMINI_ENABLED and _client is not None:
         try:
             prompt = GEMINI_CONTENT_PROMPT.format(
                 json_data=json.dumps(data, indent=2),
                 feature_descriptions=json.dumps(feature_descriptions, indent=2)
             )
-            model = genai.GenerativeModel(GEMINI_MODEL)
-            response = model.generate_content(prompt)
+            response = _client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
             raw_response = response.text.strip()
             print("📝 Raw Gemini response received")
             cleaned_response = clean_json_response(raw_response)
@@ -659,6 +707,39 @@ def generate_content(data: Dict[str, Any], feature_descriptions: Dict[str, Any])
         except Exception as e:
             print(f"⚠️ Warning: Gemini content failed: {str(e)}; using local fallback")
     return _local_content(data)
+
+def generate_report_data(data: Dict[str, Any], feature_descriptions: Dict[str, Any]) -> tuple:
+    """Generates the summary AND all content sections in a SINGLE Gemini call.
+
+    Returns (summary, content_dict). Uses one API request instead of two, halving
+    quota usage. Falls back to local generation on any failure (e.g. 429 quota), so
+    a report is always produced.
+    """
+    if GEMINI_ENABLED and _client is not None:
+        try:
+            prompt = GEMINI_COMBINED_PROMPT.format(
+                json_data=json.dumps(data, indent=2),
+                feature_descriptions=json.dumps(feature_descriptions, indent=2),
+            )
+            response = _client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+            raw_response = response.text.strip()
+            print("📝 Raw Gemini response received")
+            content = json.loads(clean_json_response(raw_response))
+            summary = str(content.pop("summary", "")).strip()
+            required_keys = [
+                "skincare_list", "grooming_list", "attractiveness_comment",
+                "positive_features_list", "features_to_improve_list", "other_observations_list"
+            ]
+            for key in required_keys:
+                if key not in content:
+                    content[key] = [] if key.endswith("_list") else ""
+            if not summary:
+                summary = _local_summary(data)
+            print(f"✅ Generated summary and content ({len(summary)} char summary)")
+            return summary, content
+        except Exception as e:
+            print(f"⚠️ Warning: Gemini generation failed: {str(e)}; using local fallback")
+    return _local_summary(data), _local_content(data)
 
 def format_list_items(items: List[str]) -> str:
     """Formats a list of items into HTML <li> tags with validation."""

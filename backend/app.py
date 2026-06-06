@@ -16,8 +16,7 @@ import datetime
 
 from Gemini import (
     configure_gemini,
-    generate_summary as gemini_generate_summary,
-    generate_content as gemini_generate_content,
+    generate_report_data as gemini_generate_report,
     generate_html_report as gemini_generate_html_report,
     load_json_file as gemini_load_json_file,
 )
@@ -50,8 +49,9 @@ print("Model loaded successfully!")
 origins = [
     "http://localhost:3000",   # Next.js dev server
     "http://127.0.0.1:3000",   # loopback host
-    "https://lumera-frontend.onrender.com",  # deployed frontend
 ]
+# Production frontend origin(s) come from the env (comma-separated), e.g.
+# FRONTEND_ORIGINS=https://lumera-frontend.onrender.com
 extra_origins = os.environ.get("FRONTEND_ORIGINS", "")
 if extra_origins:
     origins.extend(o.strip() for o in extra_origins.split(",") if o.strip())
@@ -114,24 +114,18 @@ async def predict(request: Request, file: UploadFile = File(...)):
             raise HTTPException(status_code=500, detail=f"Failed to load attribute mapping: {str(e)}")
 
         try:
-            summary_text = gemini_generate_summary(prediction)
-            print("[DEBUG] Summary generated.")
+            # Single Gemini call returns both the summary and the content sections
+            summary_text, content_sections = gemini_generate_report(prediction, feature_descriptions)
+            print("[DEBUG] Summary and content generated.")
         except Exception as e:
-            print(f"[ERROR] Summary generation failed: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Summary generation failed: {str(e)}")
-
-        try:
-            content_sections = gemini_generate_content(prediction, feature_descriptions)
-            print("[DEBUG] Content sections generated.")
-        except Exception as e:
-            print(f"[ERROR] Content generation failed: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Content generation failed: {str(e)}")
+            print(f"[ERROR] Report generation failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
 
         # Step 2: Generate HTML report and save under static/reports
         report_filename = f"report_{name_root}_{timestamp}.html"
         report_path = os.path.join(REPORTS_DIR, report_filename)
         base_url_for_image = str(request.base_url).rstrip('/')
-        absolute_image_url = f"{base_url_for_image}/static/user_images/{output_filename}"
+        absolute_image_url = f"{base_url_for_image}/static/user_images/cropped_{output_filename}"
         try:
             html = gemini_generate_html_report(
                 data=prediction,

@@ -1,27 +1,7 @@
-# Python
 __pycache__/
-**/__pycache__/
 *.pyc
-backend/venv/
 .venv/
-
-# Model files (large binaries)
 *.pth
-backend/model/*.pth
-
-# Environment variables (contain sensitive API keys)
 .env
-backend/.env
-frontend/.env
-
-# Static files (user uploads and generated reports)
-backend/static/user_images/
-backend/static/accepted/
-backend/static/reports/
-
-# Node
 node_modules/
-
-# OS / editor
-.DS_Store
-Thumbs.db
+static/
