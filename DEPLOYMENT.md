@@ -118,7 +118,8 @@ You don't need to touch the code — these were already applied and tested local
   HTML and the cropped face as a base64 data URL.
 - **Self-contained reports** (`backend/Gemini.py`): the logo (`backend/assets/logo_new.jpg`)
   and the cropped image are embedded as base64, so reports need no static file serving.
-- **Vercel entry point**: `backend/vercel.json` + `backend/api/index.py`.
+- **Vercel config**: `backend/vercel.json` builds `app.py` with the Python runtime
+  (`@vercel/python`) and routes all requests to it.
 - **Dependencies** (`backend/requirements.txt`): `opencv-python-headless`, UTF-8 encoded.
 - **Frontend** (`frontend/src/app/analysis/page.tsx`): opens the inline report via a Blob;
   `frontend/src/app/lib/api.ts` reads the backend URL from `NEXT_PUBLIC_API_BASE_URL`.
