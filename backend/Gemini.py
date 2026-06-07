@@ -338,7 +338,7 @@ ENHANCED_HTML_TEMPLATE = """
     <div class="container">
         <header>
             <div class="logo-container">
-                <img src="/static/logo_new.jpg" alt="LUMÉRA AI Logo" class="logo">
+                <img src="{logo_src}" alt="LUMÉRA AI Logo" class="logo">
                 <div class="logo-text">LUMÉRA AI</div>
             </div>
             <h1>Facial Analysis Report</h1>
@@ -759,6 +759,17 @@ def get_formatted_timestamp() -> str:
     """Returns current timestamp in a nice format."""
     return datetime.now().strftime("%B %d, %Y, %I:%M %p IST")
 
+def _logo_data_url() -> str:
+    """Returns the LUMÉRA logo as a base64 data URL so reports are self-contained
+    (works inline/offline and on serverless hosts with no static file serving)."""
+    try:
+        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo_new.jpg")
+        with open(logo_path, "rb") as f:
+            import base64
+            return "data:image/jpeg;base64," + base64.b64encode(f.read()).decode("utf-8")
+    except Exception:
+        return ""  # logo omitted if the asset is missing
+
 def generate_html_report(
     data: Dict[str, Any],
     summary: str,
@@ -779,6 +790,7 @@ def generate_html_report(
         # Generate HTML
         html_report = ENHANCED_HTML_TEMPLATE.format(
             timestamp=timestamp,
+            logo_src=_logo_data_url(),
             image_path=image_path,
             summary_text=summary,
             skincare_list=format_list_items(content.get("skincare_list", [])),

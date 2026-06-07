@@ -17,6 +17,7 @@ export default function AnalysisPage() {
     grouped_attributes?: Record<string, unknown>;
     cropped_image?: string;
     report_url?: string;
+    report_html?: string;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -50,6 +51,7 @@ export default function AnalysisPage() {
         cropped_image?: string;
         cropped_image_filename?: string;
         report_url?: string;
+        report_html?: string;
       } = await uploadImageForAnalysis(uploadedFile);
       setAnalysisData(data);
       if (data?.cropped_image_filename) {
@@ -89,7 +91,11 @@ export default function AnalysisPage() {
     setConsentShown(false);
     setShowDetailed(true);
 
-    if (analysisData?.report_url) {
+    // The backend returns the report as inline HTML; open it via a Blob URL.
+    if (analysisData?.report_html) {
+      const blob = new Blob([analysisData.report_html], { type: 'text/html' });
+      window.open(URL.createObjectURL(blob), '_blank');
+    } else if (analysisData?.report_url) {
       window.open(analysisData.report_url, '_blank');
     }
   };

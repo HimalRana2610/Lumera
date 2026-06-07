@@ -1,159 +1,125 @@
-# Deploying Lumera
+# Deploying Lumera on Vercel (frontend + backend)
 
-This guide deploys Lumera with:
-
-- **Frontend (Next.js) → Vercel** — served over HTTPS, so the **mobile camera works**.
-- **Backend (FastAPI) → Render** — a persistent web service that fits the app as-is
-  (it saves/serves images and reports, which Vercel's serverless functions can't do).
-
-Both get HTTPS, so there's no mixed-content blocking between them.
+The code is already prepared for an all-Vercel deployment (see **"What's already done"** at
+the bottom). You deploy the repo as **two Vercel projects** — one for the frontend, one for
+the backend — and connect them with environment variables. That's it.
 
 ```
- Mobile / Browser ──HTTPS──> Vercel (frontend)
-                                 │  calls NEXT_PUBLIC_API_BASE_URL
-                                 ▼
-                             Render (FastAPI backend) ──> Hugging Face Space + Gemini
+Phone/Browser ──HTTPS──> Vercel: lumera-frontend (Next.js)
+                              │  NEXT_PUBLIC_API_BASE_URL
+                              ▼
+                         Vercel: lumera-backend (FastAPI serverless) ──> HF Space + Gemini
 ```
 
 ---
 
-## Prerequisites
+## Prerequisite — push the code to GitHub
 
-- A **GitHub** account with this repo pushed (Vercel & Render deploy from GitHub).
-- A **Vercel** account and a **Render** account (both have free tiers).
-- A **Google Gemini API key**.
-
-> **Note:** Both platforms build from your GitHub repo, so commit and push your latest
-> code first. Your secrets stay safe — `backend/.env` and `frontend/.env.local` are
-> git-ignored and are **not** used in production; you set those values as environment
-> variables in the Vercel/Render dashboards instead.
-
----
-
-## Step 0 — Push the latest code to GitHub
+Vercel builds from GitHub, so commit and push first:
 
 ```bash
 git add -A
-git commit -m "Prepare for deployment"
+git commit -m "Serverless backend + all-Vercel deployment"
 git push origin main
 ```
 
----
-
-## Step 1 — Delete the old Render deployment
-
-1. Go to the [Render dashboard](https://dashboard.render.com/).
-2. Open the old **`lumera-frontend`** service.
-3. **Settings → Delete Service** (type the name to confirm).
-4. (Optional) Do the same for any old backend service if you want a fully fresh start.
+You'll also want a **Google Gemini API key** ready.
 
 ---
 
-## Step 2 — Required backend change (OpenCV on Linux)
+## Step 1 — Deploy the BACKEND project
 
-Render's Linux runtime doesn't ship the system library `libGL.so.1` that `opencv-python`
-needs, so it fails to import. Switch to the headless build (identical API, no GUI deps —
-also fine locally since the app never opens windows).
+1. [Vercel dashboard](https://vercel.com/dashboard) → **Add New → Project** → import this repo.
+2. **Project Name:** `lumera-backend`
+3. **Root Directory:** `backend`   ← important
+4. **Framework Preset:** **Other**
+5. Leave Build/Output/Install commands empty (the included `vercel.json` handles it).
+6. Expand **Environment Variables** and add:
 
-In **`backend/requirements.txt`**, change:
-
-```diff
-- opencv-python==4.13.0.92
-+ opencv-python-headless==4.13.0.92
-```
-
-Commit and push this change.
-
----
-
-## Step 3 — Deploy the backend to Render
-
-1. Render dashboard → **New + → Web Service** → connect this GitHub repo.
-2. Configure:
-   | Setting | Value |
-   |---|---|
-   | **Name** | `lumera-backend` (your choice) |
-   | **Root Directory** | `backend` |
-   | **Runtime** | Python 3 |
-   | **Build Command** | `pip install -r requirements.txt` |
-   | **Start Command** | `uvicorn app:app --host 0.0.0.0 --port $PORT` |
-   | **Instance Type** | Free (or paid for no cold starts) |
-3. Add **Environment Variables** (Advanced → Add Environment Variable):
    | Key | Value |
    |---|---|
    | `GEMINI_API_KEY` | your Gemini API key |
    | `GEMINI_MODEL` | `gemini-2.5-flash-lite` *(optional)* |
-   | `HF_API_URL` | *(optional — defaults to the bundled Space URL)* |
-   | `FRONTEND_ORIGINS` | leave blank for now; set in Step 5 |
-   | `PYTHON_VERSION` | `3.12.8` |
-4. Click **Create Web Service** and wait for the build to finish.
-5. Copy the service URL, e.g. **`https://lumera-backend.onrender.com`**.
-6. Verify: open `https://lumera-backend.onrender.com/health` → `{"status":"healthy", ...}`.
+   | `HF_API_URL` | *(optional — leave unset to use the default Space)* |
+   | `FRONTEND_ORIGINS` | leave empty for now (set in Step 3) |
 
-> **Free-tier note:** the service sleeps after ~15 min idle; the first request after
-> waking takes ~50s (cold start). Uploaded images/reports live on the instance's disk
-> and are cleared on redeploy/restart — fine for this app, since reports are transient.
+7. Click **Deploy**.
+8. Copy the resulting URL, e.g. `https://lumera-backend.vercel.app`.
+9. **Test:** open `https://lumera-backend.vercel.app/health` → you should see
+   `{"status":"healthy", ...}`.
 
 ---
 
-## Step 4 — Deploy the frontend to Vercel
+## Step 2 — Deploy the FRONTEND project
 
-1. [Vercel dashboard](https://vercel.com/dashboard) → **Add New → Project** → import this repo.
-2. Configure:
-   | Setting | Value |
-   |---|---|
-   | **Root Directory** | `frontend` |
-   | **Framework Preset** | Next.js *(auto-detected)* |
-   | **Build / Install** | defaults (`next build` / `npm install`) |
-3. Add **Environment Variable**:
+1. **Add New → Project** → import the **same** repo again.
+2. **Project Name:** `lumera-frontend`
+3. **Root Directory:** `frontend`   ← important
+4. **Framework Preset:** **Next.js** (auto-detected).
+5. Add **Environment Variable**:
+
    | Key | Value |
    |---|---|
-   | `NEXT_PUBLIC_API_BASE_URL` | your Render backend URL, e.g. `https://lumera-backend.onrender.com` |
-4. Click **Deploy** and wait for it to finish.
-5. Copy the production URL, e.g. **`https://lumera-xxxx.vercel.app`**.
+   | `NEXT_PUBLIC_API_BASE_URL` | your backend URL from Step 1, e.g. `https://lumera-backend.vercel.app` |
 
-> `NEXT_PUBLIC_*` variables are baked in at **build time**. If you change the backend URL
-> later, update the env var **and redeploy** the frontend.
+6. Click **Deploy**.
+7. Copy the frontend URL, e.g. `https://lumera-frontend.vercel.app`.
 
 ---
 
-## Step 5 — Connect them (CORS)
+## Step 3 — Connect them (CORS)
 
-The backend only accepts requests from origins it knows about.
-
-1. Render dashboard → your backend service → **Environment**.
+1. Open the **`lumera-backend`** project → **Settings → Environment Variables**.
 2. Set:
+
    | Key | Value |
    |---|---|
-   | `FRONTEND_ORIGINS` | your Vercel URL, e.g. `https://lumera-xxxx.vercel.app` |
-3. Save — Render redeploys automatically. (For multiple origins, comma-separate them.)
+   | `FRONTEND_ORIGINS` | your frontend URL from Step 2, e.g. `https://lumera-frontend.vercel.app` |
+
+3. Go to the backend's **Deployments** tab → **⋯ → Redeploy** so it picks up the new value.
 
 ---
 
-## Step 6 — Verify on mobile
+## Step 4 — Verify
 
-1. Open the **Vercel URL** on your phone (it's HTTPS).
-2. Go to **Analyze → Camera Capture** → **Allow** the camera prompt → the live camera
-   should appear (HTTPS satisfies the browser's secure-context requirement).
-3. Capture a photo and run an analysis → you should get a summary and report.
+1. Open the **frontend URL on your phone** (it's HTTPS, so the **camera works**).
+2. Capture or upload a photo → **Generate Summary** → **Get Detailed Analysis**.
+3. The analysis summary appears, and the detailed report opens in a new tab.
+
+Done. 🎉
 
 ---
 
-## Troubleshooting
+## Updating later
 
-| Symptom | Cause / Fix |
+- Push to `main` → both Vercel projects redeploy automatically.
+- If you change `NEXT_PUBLIC_API_BASE_URL`, you must **redeploy the frontend** (that value is
+  baked in at build time).
+
+---
+
+## Good to know (limitations of serverless)
+
+| Area | Behavior |
 |---|---|
-| Camera is a black box on mobile | The page must be HTTPS. Vercel is HTTPS by default — make sure you opened the `vercel.app` URL, not a `http://<LAN-IP>` address. |
-| Browser console: CORS error | `FRONTEND_ORIGINS` on Render must exactly match your Vercel URL (scheme + host, no trailing slash). Redeploy the backend after changing it. |
-| API calls fail / "Network Error" | `NEXT_PUBLIC_API_BASE_URL` on Vercel must point to the Render backend; redeploy the frontend after changing it. |
-| Backend build fails on `cv2` / `libGL.so.1` | You skipped Step 2 — use `opencv-python-headless`. |
-| First request very slow | Render free-tier cold start (~50s). Upgrade the instance or hit `/health` to warm it. |
-| Report shows fallback text, not Gemini | Gemini quota hit or `GEMINI_API_KEY` not set on Render. Check the key and free-tier limits. |
+| Uploaded images / reports | Not stored — processed per request; the report is returned inline and opens in a new tab. |
+| `/consent` | Acknowledges consent but does **not** store images (serverless has no disk). To collect images, wire it to Vercel Blob / S3. |
+| Cold starts | First request after idle is slow while the Python function + OpenCV load. |
+| Function timeout | Capped at 60s — the HF Space + Gemini calls must finish within it. |
+| Bundle size | The backend uses `opencv-python-headless` to stay smaller; if a build ever fails on size (250 MB limit), move the backend to Render instead (it runs the same code). |
 
 ---
 
-## Custom domains (optional)
+## What's already done for you (code changes)
 
-- **Vercel:** Project → Settings → Domains → add your domain.
-- **Render:** Service → Settings → Custom Domains.
-- After adding a frontend domain, add it to the backend's `FRONTEND_ORIGINS` too.
+You don't need to touch the code — these were already applied and tested locally:
+
+- **Stateless backend** (`backend/app.py`): no disk writes; returns the report as inline
+  HTML and the cropped face as a base64 data URL.
+- **Self-contained reports** (`backend/Gemini.py`): the logo (`backend/assets/logo_new.jpg`)
+  and the cropped image are embedded as base64, so reports need no static file serving.
+- **Vercel entry point**: `backend/vercel.json` + `backend/api/index.py`.
+- **Dependencies** (`backend/requirements.txt`): `opencv-python-headless`, UTF-8 encoded.
+- **Frontend** (`frontend/src/app/analysis/page.tsx`): opens the inline report via a Blob;
+  `frontend/src/app/lib/api.ts` reads the backend URL from `NEXT_PUBLIC_API_BASE_URL`.
+- **CORS** (`backend/app.py`): production origins come from `FRONTEND_ORIGINS`.
